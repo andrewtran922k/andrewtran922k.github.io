@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stranded — BREW Business Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a1510;
+  --bg2:      #0d1a12;
+  --bg3:      #112018;
+  --border:   #1e3525;
+  --border2:  #2d5e38;
+  --teal:     #1d9e75;
+  --teal2:    #5dcaa5;
+  --teal3:    #9fe1cb;
+  --amber:    #ef9f27;
+  --amber2:   #fac775;
+  --red:      #a32d2d;
+  --red2:     #f09595;
+  --blue:     #378add;
+  --muted:    #4a7a56;
+  --text:     #c8dcc8;
+  --text2:    #7ab88a;
+  --textdim:  #3d6645;
+  --cream:    #e8d5a0;
+  --maya:     #5dcaa5;
+  --rex:      #ef9f27;
+  --lena:     #85b7eb;
+  --sam:      #f0997b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+h1,h2,h3 { font-family: 'Playfair Display', serif; }
+code, .mono { font-family: 'DM Mono', monospace; }
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── INTRO SCREEN ── */
+#s-intro {
+  align-items: center; justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(ellipse 80% 60% at 50% 80%, #0f3326 0%, var(--bg) 60%);
+}
+.intro-inner { max-width: 480px; width: 100%; text-align: center; }
+.intro-badge {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal2);
+  border: 0.5px solid var(--teal2); padding: 4px 12px; border-radius: 3px;
+  margin-bottom: 1.5rem;
+}
+.intro-title {
+  font-size: clamp(3rem, 12vw, 5.5rem); font-weight: 900;
+  color: var(--cream); line-height: 0.9; margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+.intro-title span { color: var(--teal2); }
+.intro-sub { font-size: 13px; color: var(--muted); margin-bottom: 2.5rem; line-height: 1.7; }
+.mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+.mode-card {
+  padding: 1rem; border-radius: 10px; cursor: pointer;
+  border: 0.5px solid var(--border2); background: var(--bg2);
+  transition: all 0.2s; text-align: left;
+}
+.mode-card:hover { background: var(--bg3); border-color: var(--teal2); }
+.mode-card.selected { border: 1.5px solid var(--teal2); background: #0f2e1a; }
+.mode-card h3 { font-family: 'DM Sans',sans-serif; font-size: 13px; font-weight: 500; color: var(--cream); margin-bottom: 3px; }
+.mode-card p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.btn-start {
+  width: 100%; padding: 14px; border-radius: 8px; border: none; cursor: pointer;
+  background: var(--teal); color: #fff; font-size: 15px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+}
+.btn-start:hover { opacity: 0.88; }
+
+/* ── CHAR SELECT ── */
+#s-charsel {
+  padding: 1.5rem;
+  background: radial-gradient(ellipse 60% 40% at 50% 100%, #0f3326 0%, var(--bg) 55%);
+}
+.charsel-header { text-align: center; margin-bottom: 1.5rem; }
+.charsel-header h2 { font-size: 1.8rem; color: var(--cream); margin-bottom: 0.4rem; }
+.charsel-header p { font-size: 12px; color: var(--muted); }
+.char-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 560px; margin: 0 auto 1.5rem; }
+.char-select-card {
+  padding: 1rem; border-radius: 12px; cursor: pointer;
+  border: 0.5px solid var(--border); background: var(--bg2); transition: all 0.2s;
+}
+.char-select-card:hover { background: var(--bg3); }
+.char-select-card.selected { border-width: 1.5px; background: var(--bg3); }
+.csc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.csc-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; flex-shrink: 0;
+}
+.csc-name { font-size: 14px; font-weight: 500; color: var(--cream); }
+.csc-role { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+.csc-bio { font-size: 11px; color: var(--muted); line-height: 1.45; margin-bottom: 10px; }
+.stat-mini { display: flex; flex-direction: column; gap: 4px; }
+.stat-mini-row { display: flex; align-items: center; gap: 5px; }
+.stat-mini-lbl { font-size: 9px; color: var(--textdim); width: 60px; }
+.stat-mini-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.stat-mini-fill { height: 100%; border-radius: 2px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; background: #080f0b;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.topbar-brand { font-family: 'Playfair Display',serif; font-size: 14px; font-weight: 700; color: var(--teal2); letter-spacing: 0.05em; }
+.topbar-day { font-size: 11px; color: var(--muted); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.morale-pill {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--teal2); background: #0a1e10;
+  padding: 3px 8px; border-radius: 20px; border: 0.5px solid var(--border2);
+}
+.morale-bar { width: 36px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.morale-fill { height: 100%; border-radius: 2px; background: var(--teal2); transition: width 0.6s; }
+
+/* ── RESCUE BAR ── */
+.rescue-strip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 14px; background: #060e08;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.rescue-label { font-size: 9px; color: var(--textdim); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+.rescue-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.rescue-fill { height: 100%; border-radius: 2px; background: var(--amber); transition: width 0.8s; }
+.rescue-pct { font-size: 10px; color: var(--amber); white-space: nowrap; }
+
+/* ── GAME LAYOUT ── */
+#s-game { flex-direction: column; }
+.game-body { flex: 1; overflow-y: auto; }
+.game-inner { max-width: 680px; margin: 0 auto; padding: 12px 14px 80px; }
+
+/* ── RESOURCES ── */
+.resources-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border);
+}
+.res-cell { background: var(--bg2); padding: 9px 10px; }
+.res-icon { font-size: 16px; margin-bottom: 2px; }
+.res-val { font-size: 16px; font-weight: 500; color: var(--cream); font-family: 'DM Mono', monospace; }
+.res-lbl { font-size: 9px; color: var(--textdim); text-transform: uppercase; letter-spacing: 0.06em; }
+.res-delta { font-size: 9px; margin-top: 1px; font-family: 'DM Mono', monospace; }
+
+/* ── SECTION LABEL ── */
+.sec-lbl { font-size: 9px; color: var(--textdim); text-transform: uppercase; letter-spacing: 0.14em; margin: 12px 0 6px; }
+
+/* ── CHARACTERS ── */
+.chars-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border);
+}
+.char-cell {
+  background: var(--bg2); padding: 9px 8px; cursor: pointer; transition: background 0.15s;
+}
+.char-cell:hover { background: var(--bg3); }
+.char-cell.selected { background: #0f2318; }
+.char-cell.assigned { border-bottom: 2px solid var(--teal2); }
+.char-cell.warning { border-bottom: 2px solid var(--amber); }
+.char-initials { font-size: 10px; font-weight: 500; margin-bottom: 2px; }
+.char-name-sm { font-size: 11px; color: var(--cream); }
+.char-task-sm { font-size: 9px; color: var(--textdim); margin-top: 2px; min-height: 12px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.char-task-sm.active { color: var(--teal2); font-style: normal; }
+.energy-bar { margin-top: 5px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.energy-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.char-mood-sm { font-size: 9px; margin-top: 3px; }
+
+/* ── TASK PANEL ── */
+.task-panel {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; margin-bottom: 12px;
+  transition: opacity 0.2s;
+}
+.task-panel-label { font-size: 11px; font-weight: 500; color: var(--text2); margin-bottom: 2px; }
+.task-panel-hint { font-size: 10px; color: var(--textdim); }
+.task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
+.task-btn {
+  padding: 8px 10px; border-radius: 7px; cursor: pointer;
+  font-size: 10px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border2); background: var(--bg);
+  color: var(--text2); text-align: left; transition: all 0.12s;
+}
+.task-btn:hover { background: var(--bg3); border-color: var(--teal2); }
+.task-btn.assigned { background: #0a2215; border-color: var(--teal2); color: var(--teal2); }
+.task-btn-title { font-weight: 500; margin-bottom: 1px; }
+.task-btn-cost { font-size: 9px; color: var(--textdim); font-family: 'DM Mono', monospace; }
+.task-btn.assigned .task-btn-cost { color: #2d7a56; }
+
+/* ── LOG ── */
+.log-area {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+}
+.log-title { font-size: 9px; color: var(--textdim); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+.log-entry { font-size: 11px; padding: 4px 0; border-bottom: 0.5px solid var(--border); color: var(--muted); line-height: 1.4; }
+.log-entry:last-child { border-bottom: none; }
+.log-entry.good { color: var(--teal2); }
+.log-entry.warn { color: var(--amber); }
+.log-entry.bad { color: var(--red2); }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  display: flex; gap: 8px; padding: 10px 14px;
+  background: #080f0b; border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.btn-hint {
+  flex: 1; padding: 11px; border-radius: 7px; border: 0.5px solid var(--border2);
+  background: transparent; color: var(--text2); font-size: 12px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
+}
+.btn-hint:hover { background: var(--bg3); }
+.btn-end {
+  flex: 2; padding: 11px; border-radius: 7px; border: none;
+  background: var(--teal); color: #fff; font-size: 13px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-end:hover { opacity: 0.88; }
+.btn-end:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── CRISIS SCREEN ── */
+#s-crisis {
+  align-items: center; justify-content: center; padding: 1.5rem;
+  background: radial-gradient(ellipse 80% 60% at 50% 80%, #2a0808 0%, var(--bg) 60%);
+}
+.crisis-card {
+  max-width: 440px; width: 100%;
+  background: #14080a; border: 1px solid var(--red);
+  border-radius: 14px; padding: 1.5rem; overflow: hidden;
+}
+.crisis-type-badge { font-size: 9px; color: var(--red2); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px; }
+.crisis-card h2 { font-size: 1.5rem; color: #f7c1c1; margin-bottom: 10px; }
+.crisis-desc { font-size: 12px; color: #c08080; line-height: 1.6; margin-bottom: 16px; }
+.crisis-status { font-size: 10px; color: var(--red2); margin-bottom: 12px; padding: 6px 10px; background: #1f0c0c; border-radius: 5px; }
+.crisis-opts { display: flex; flex-direction: column; gap: 7px; }
+.crisis-opt {
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 11px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid #4a1c1c; background: #1a0a0a;
+  color: #e8a0a0; text-align: left; line-height: 1.45; transition: all 0.15s;
+}
+.crisis-opt:hover { background: #241010; border-color: #7a2020; }
+.crisis-opt.opt-good { border-color: var(--border2); background: #0a1e10; color: var(--text2); }
+.crisis-opt:hover.opt-good { background: var(--bg3); }
+.crisis-opt strong { display: block; font-weight: 500; margin-bottom: 2px; }
+
+/* ── SCORE SCREEN ── */
+#s-score {
+  align-items: center; justify-content: center; padding: 1.5rem;
+  background: radial-gradient(ellipse 80% 60% at 50% 80%, #0f3326 0%, var(--bg) 60%);
+}
+.score-card { max-width: 440px; width: 100%; }
+.score-header { text-align: center; margin-bottom: 1.5rem; }
+.score-label { font-size: 10px; color: var(--textdim); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px; }
+.score-big { font-size: 5rem; font-weight: 900; color: var(--teal2); line-height: 1; font-family: 'Playfair Display', serif; }
+.score-grade { font-size: 14px; color: var(--amber); margin-top: 4px; }
+.score-sub { font-size: 11px; color: var(--textdim); margin-top: 4px; }
+.score-dims { display: flex; flex-direction: column; gap: 7px; margin-bottom: 1.2rem; }
+.score-dim-row { display: flex; align-items: center; gap: 8px; }
+.score-dim-lbl { font-size: 11px; color: var(--text2); width: 100px; flex-shrink: 0; }
+.score-dim-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-dim-fill { height: 100%; border-radius: 3px; transition: width 1s; }
+.score-dim-val { font-size: 11px; color: var(--cream); width: 36px; text-align: right; font-family: 'DM Mono', monospace; }
+.debrief-box {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 12px; margin-bottom: 1rem;
+}
+.debrief-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--textdim); margin-bottom: 8px; }
+.debrief-item { font-size: 11px; color: var(--text2); padding: 4px 0; border-bottom: 0.5px solid var(--border); line-height: 1.45; }
+.debrief-item:last-child { border-bottom: none; }
+.score-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-replay {
+  padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s;
+}
+.btn-replay.primary { background: var(--teal); color: #fff; border: none; }
+.btn-replay.primary:hover { opacity: 0.88; }
+.btn-replay.secondary { background: transparent; border: 0.5px solid var(--border2); color: var(--text2); }
+.btn-replay.secondary:hover { background: var(--bg3); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="screen active" id="s-intro">
+  <div class="intro-inner">
+    <div class="intro-badge">BREW Business Academy</div>
+    <h1 class="intro-title">STRAND<span>ED</span></h1>
+    <p class="intro-sub">Four survivors. One island. Every decision teaches you something about business — whether you survive or not.</p>
+    <p class="sec-lbl" style="text-align:left;margin-bottom:8px;">Choose your mode</p>
+    <div class="mode-cards">
+      <div class="mode-card selected" id="mode-leader" onclick="selectMode('leader')">
+        <h3>Leadership mode</h3>
+        <p>Command all four survivors. Delegate, allocate, and lead under pressure. Hardest mode — full visibility, full responsibility.</p>
+      </div>
+      <div class="mode-card" id="mode-coop" onclick="selectMode('coop')">
+        <h3>Co-op mode</h3>
+        <p>Play as one character. Limited information, constrained role. Choose your survivor on the next screen.</p>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startGame()">Begin survival →</button>
+    <p style="font-size:10px;color:var(--textdim);margin-top:12px;">No account needed · runs in your browser · free</p>
+  </div>
+</div>
+
+<!-- ═══════════ CHAR SELECT ═══════════ -->
+<div class="screen" id="s-charsel">
+  <div class="charsel-header">
+    <h2>Choose your survivor</h2>
+    <p>You'll experience the island from their perspective only.</p>
+  </div>
+  <div class="char-grid" id="char-grid-select"></div>
+  <div style="max-width:560px;margin:0 auto;padding:0 14px;">
+    <button class="btn-start" onclick="confirmCharSelect()">Play as <span id="selected-char-name">Maya</span> →</button>
+  </div>
+</div>
+
+<!-- ═══════════ GAME ═══════════ -->
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <span class="topbar-brand">Stranded</span>
+    <span class="topbar-day" id="day-display">Day 1 of 30</span>
+    <div class="topbar-right">
+      <div class="morale-pill">
+        <div class="morale-bar"><div class="morale-fill" id="morale-bar"></div></div>
+        <span id="morale-val">70</span>
+      </div>
+    </div>
+  </div>
+  <div class="rescue-strip">
+    <span class="rescue-label">Rescue chance</span>
+    <div class="rescue-track"><div class="rescue-fill" id="rescue-bar"></div></div>
+    <span class="rescue-pct" id="rescue-pct">5%</span>
+  </div>
+  <div class="game-body">
+    <div class="game-inner">
+      <div class="resources-row" id="resources-row"></div>
+      <div class="sec-lbl">Survivors — assign tasks</div>
+      <div class="chars-row" id="chars-row"></div>
+      <div class="task-panel" id="task-panel">
+        <div class="task-panel-label" id="task-label">Select a survivor to assign a task</div>
+        <div class="task-panel-hint" id="task-hint">Click any character card above</div>
+        <div class="task-grid" id="task-grid" style="display:none"></div>
+      </div>
+      <div class="log-area">
+        <div class="log-title">Activity log</div>
+        <div id="log-entries"></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn-hint" onclick="showHint()">Hint?</button>
+    <button class="btn-end" id="btn-end-day" onclick="endDay()">End day →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CRISIS ═══════════ -->
+<div class="screen" id="s-crisis">
+  <div class="crisis-card">
+    <div class="crisis-type-badge" id="crisis-type">Environmental</div>
+    <h2 id="crisis-title">Crisis event</h2>
+    <div class="crisis-desc" id="crisis-desc"></div>
+    <div class="crisis-status" id="crisis-status"></div>
+    <div class="crisis-opts" id="crisis-opts"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SCORE ═══════════ -->
+<div class="screen" id="s-score">
+  <div class="score-card">
+    <div class="score-header">
+      <div class="score-label">Final rescue score</div>
+      <div class="score-big" id="score-big">84</div>
+      <div class="score-grade" id="score-grade">B+ · Strong Operator</div>
+      <div class="score-sub" id="score-sub">Rescued on day 18</div>
+    </div>
+    <div class="score-dims" id="score-dims"></div>
+    <div class="debrief-box">
+      <div class="debrief-title">Business debrief</div>
+      <div id="debrief-items"></div>
+    </div>
+    <div class="score-btns">
+      <button class="btn-replay secondary" onclick="goIntro()">← Main menu</button>
+      <button class="btn-replay primary" onclick="restartGame()">Play again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  GAME DATA
+// ═══════════════════════════════════════════════
+const CHARS = {
+  maya: { name:'Maya', role:'Strategist', init:'MA', color:'var(--maya)',
+    bg:'#0a2a1a', stats:{planning:95,strength:20,crafting:45,morale_aura:70,resilience:55},
+    bio:'Former consultant. Plans perfectly on paper.',
+    best:['signal','explore','morale'], weak:['gather-wood','build'],
+    weakness:'Loses 2 turns on crisis if no contingency task was assigned.' },
+  rex:  { name:'Rex',  role:'Operator',   init:'RX', color:'var(--rex)',
+    bg:'#1f1208', stats:{planning:35,strength:95,crafting:90,morale_aura:40,resilience:85},
+    bio:'Ex-military. Builds anything. Needs direction.',
+    best:['build','gather-wood','gather-food'], weak:['signal','morale'],
+    weakness:'Morale drops fast if unassigned 2+ days.' },
+  lena: { name:'Lena', role:'Analyst',    init:'LE', color:'var(--lena)',
+    bg:'#08101e', stats:{planning:80,strength:25,crafting:85,morale_aura:35,resilience:45},
+    bio:'Data scientist. Forecasts everything. Needs data.',
+    best:['explore','build','fetch-water'], weak:['gather-wood','gather-food'],
+    weakness:'Team morale −5/day when Lena has no forecast task.' },
+  sam:  { name:'Sam',  role:'Negotiator', init:'SA', color:'var(--sam)',
+    bg:'#1f100a', stats:{planning:60,strength:50,crafting:40,morale_aura:95,resilience:60},
+    bio:'HR director. Keeps the team together.',
+    best:['morale','signal','fetch-water'], weak:['build','gather-wood'],
+    weakness:'Triggers conflict event if no leadership task for 3 turns.' }
+};
+
+const TASKS = [
+  { id:'gather-food',  label:'Gather food',   cost:'−3 energy',  effect: s => { s.food += calcOutput(s,'gather-food'); addLog(s,'Foraging for food.',''); } },
+  { id:'gather-wood',  label:'Gather wood',   cost:'−3 energy',  effect: s => { s.wood += calcOutput(s,'gather-wood'); addLog(s,'Gathering wood.',''); } },
+  { id:'fetch-water',  label:'Fetch water',   cost:'−2 energy',  effect: s => { s.water += calcOutput(s,'fetch-water'); addLog(s,'Fetching water.',''); } },
+  { id:'build',        label:'Build / craft', cost:'−4 energy',  effect: s => { s.buildProgress = (s.buildProgress||0) + calcOutput(s,'build'); addLog(s,'Working on construction.',''); } },
+  { id:'morale',       label:'Boost morale',  cost:'−1 energy',  effect: s => { s.morale = Math.min(100, s.morale + 8); addLog(s,'Lifting team spirits.',  'good'); } },
+  { id:'rest',         label:'Rest',          cost:'+4 energy',  effect: s => { addLog(s,'Resting and recovering.',''); } },
+  { id:'signal',       label:'Signal watch',  cost:'−2 energy',  effect: s => { s.rescueChance = Math.min(95, s.rescueChance + 6); addLog(s,'Watching for ships / aircraft.','good'); } },
+  { id:'explore',      label:'Explore',       cost:'−3 energy',  effect: s => { if(Math.random()<0.3){ s.salvage+=2; addLog(s,'Found salvage materials!','good');} else addLog(s,'Explored the island.',''); } }
+];
+
+const CRISIS_DECK = [
+  { type:'Environmental', title:'Tropical storm',
+    desc:'A storm is moving in. All outdoor tasks will be cancelled for 2 days. Without shelter, food spoils (−6 cal) and morale drops (−12).',
+    status: s => s.shelterBuilt ? '✓ Shelter built — damage reduced.' : '⚠ No shelter — full damage applies.',
+    opts: [
+      { label:'Shelter in place', good: s => s.shelterBuilt, text:'Ride it out. Lose 2 turns outdoors.',
+        fn: s => { s.food -= s.shelterBuilt ? 3 : 6; s.morale -= s.shelterBuilt ? 4 : 12; addLog(s, s.shelterBuilt ? 'Storm weathered — shelter held.' : 'Storm battered the camp.', s.shelterBuilt?'good':'bad'); } },
+      { label:'Reinforce shelter now', good: ()=>false, text:'Spend 4 wood. Reduce food loss to 1 cal.',
+        fn: s => { if(s.wood>=4){s.wood-=4;s.food-=1;addLog(s,'Reinforced shelter before storm.','good');}else{s.food-=6;s.morale-=10;addLog(s,'Not enough wood to reinforce!','bad');} } },
+      { label:'Brave the storm', good: ()=>false, text:'Risk injury (+30% per character) for partial output.',
+        fn: s => { const injured = Object.keys(s.assignments).filter(()=>Math.random()<0.3); injured.forEach(c=>{s.injuries=s.injuries||{}; s.injuries[c]=2;}); addLog(s, injured.length ? `Storm injuries: ${injured.join(', ')}.`:'Somehow made it through.', injured.length?'bad':'good'); } }
+    ]
+  },
+  { type:'Medical', title:'Waterborne illness',
+    desc:'Impure water has made someone ill. Energy is halved for 3 turns. With a water filter this would have been prevented.',
+    status: s => s.waterFilter ? '✓ Water filter active — one character affected only.' : '⚠ No filter — spreading fast.',
+    opts: [
+      { label:'Rest and recover', good: ()=>true, text:'Lose 3 turns of one character\'s output.',
+        fn: s => { const c = Object.keys(CHARS)[Math.floor(Math.random()*4)]; s.illnesses=s.illnesses||{}; s.illnesses[c]=3; s.morale-=6; addLog(s,`${CHARS[c].name} is sick — resting for 3 days.`,'bad'); } },
+      { label:'Push through', good: ()=>false, text:'Continue working at 50% output. Risk spreading.',
+        fn: s => { s.morale -= 10; addLog(s,'Illness spreading through the camp.','bad'); } }
+    ]
+  },
+  { type:'Team dynamics', title:'Conflict erupts',
+    desc:'Two survivors refuse to work together. Task pairs are blocked for 2 days. Sam can resolve this quickly.',
+    status: s => s.assignments.sam === 'morale' ? '✓ Sam on morale — can resolve in 1 turn.' : '⚠ Sam not on morale duty.',
+    opts: [
+      { label:'Sam mediates (if on morale)', good: s => s.assignments && s.assignments.sam==='morale', text:'Resolve in 1 day. No productivity loss.',
+        fn: s => { addLog(s,'Sam resolved the conflict.','good'); } },
+      { label:'Wait it out', good: ()=>false, text:'4-day productivity penalty.',
+        fn: s => { s.morale -= 15; addLog(s,'Conflict dragged on — team fractured.','bad'); } }
+    ]
+  },
+  { type:'Opportunity', title:'Passing ship spotted!',
+    desc:'A ship is visible on the horizon. You have one turn to signal it. Is your signal fire ready?',
+    status: s => s.signalFireBuilt ? '✓ Signal fire is lit!' : '⚠ No signal fire built.',
+    opts: [
+      { label:'Signal with fire (if built)', good: s => s.signalFireBuilt, text:'Massive rescue boost +30%.',
+        fn: s => { if(s.signalFireBuilt){s.rescueChance=Math.min(95,s.rescueChance+30);addLog(s,'Signal seen! Rescue chance surged.','good');}else{addLog(s,'Ship passed — no signal fire to attract them.','bad');} } },
+      { label:'Wave and shout', good: ()=>false, text:'Tiny chance of being seen (+5%).',
+        fn: s => { s.rescueChance=Math.min(95,s.rescueChance+5); addLog(s,'Waved desperately — maybe they saw...',''); } }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════
+let STATE = {};
+let MODE = 'leader';
+let PLAYER_CHAR = 'maya';
+let SELECTED_CHAR = null;
+let ASSIGNMENTS = {};
+let LOGS = [];
+
+function initState() {
+  STATE = {
+    day: 1, maxDays: 30,
+    food: 20, water: 14, wood: 8, salvage: 4,
+    morale: 70, rescueChance: 5,
+    energies: {maya:10, rex:10, lena:10, sam:10},
+    morale_chars: {maya:71, rex:58, lena:65, sam:44},
+    shelterBuilt: false, waterFilter: false,
+    signalFireBuilt: false, buildProgress: 0,
+    buildTarget: null,
+    injuries: {}, illnesses: {},
+    assignments: {}
+  };
+  ASSIGNMENTS = {};
+  LOGS = [];
+}
+
+function addLog(s, msg, cls='') {
+  LOGS.unshift({msg, cls, day: s.day});
+  if(LOGS.length > 8) LOGS.pop();
+}
+
+function calcOutput(s, task) {
+  const charId = Object.keys(s.assignments).find(c => s.assignments[c] === task);
+  if(!charId) return 2;
+  const char = CHARS[charId];
+  const energy = s.energies[charId];
+  const eFactor = energy >= 7 ? 1.0 : energy >= 4 ? 0.75 : 0.4;
+  const taskMap = {
+    'gather-food': {maya:0.7, rex:1.5, lena:0.6, sam:1.0},
+    'gather-wood': {maya:0.6, rex:2.0, lena:0.8, sam:0.9},
+    'fetch-water': {maya:0.9, rex:1.1, lena:1.0, sam:1.0},
+    'build':       {maya:0.7, rex:2.0, lena:1.3, sam:0.8},
+    'explore':     {maya:1.2, rex:0.9, lena:1.5, sam:1.0},
+    'signal':      {maya:1.3, rex:0.8, lena:1.0, sam:1.1}
+  };
+  const charFactor = (taskMap[task] && taskMap[task][charId]) || 1.0;
+  const base = {
+    'gather-food':4,'gather-wood':5,'fetch-water':4,'build':3,'explore':1,'signal':0,'morale':0,'rest':0
+  }[task] || 2;
+  return Math.round(base * eFactor * charFactor);
+}
+
+// ═══════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function selectMode(m) {
+  MODE = m;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('mode-'+m).classList.add('selected');
+}
+
+function startGame() {
+  if(MODE === 'coop') { buildCharSelect(); showScreen('s-charsel'); }
+  else { PLAYER_CHAR = null; initState(); buildGameUI(); showScreen('s-game'); }
+}
+
+let selectedCharForCoop = 'maya';
+function buildCharSelect() {
+  const grid = document.getElementById('char-grid-select');
+  grid.innerHTML = '';
+  Object.entries(CHARS).forEach(([id, c]) => {
+    const div = document.createElement('div');
+    div.className = 'char-select-card' + (id === selectedCharForCoop ? ' selected' : '');
+    div.style.borderColor = id === selectedCharForCoop ? c.color : '';
+    div.innerHTML = `
+      <div class="csc-top">
+        <div class="csc-avatar" style="background:${c.bg};color:${c.color}">${c.init}</div>
+        <div>
+          <div class="csc-name">${c.name}</div>
+          <div class="csc-role" style="color:${c.color}">${c.role}</div>
+        </div>
+      </div>
+      <div class="csc-bio">${c.bio}</div>
+      <div class="stat-mini">
+        ${Object.entries(c.stats).slice(0,3).map(([k,v])=>`
+          <div class="stat-mini-row">
+            <span class="stat-mini-lbl">${k.replace('_',' ')}</span>
+            <div class="stat-mini-bar"><div class="stat-mini-fill" style="width:${v}%;background:${c.color}"></div></div>
+          </div>`).join('')}
+      </div>`;
+    div.onclick = () => {
+      selectedCharForCoop = id;
+      document.getElementById('selected-char-name').textContent = c.name;
+      document.querySelectorAll('.char-select-card').forEach(el => { el.classList.remove('selected'); el.style.borderColor = ''; });
+      div.classList.add('selected');
+      div.style.borderColor = c.color;
+    };
+    grid.appendChild(div);
+  });
+}
+
+function confirmCharSelect() {
+  PLAYER_CHAR = selectedCharForCoop;
+  initState();
+  buildGameUI();
+  showScreen('s-game');
+}
+
+// ═══════════════════════════════════════════════
+//  GAME UI
+// ═══════════════════════════════════════════════
+function buildGameUI() {
+  renderTopbar();
+  renderResources();
+  renderChars();
+  renderTaskPanel(null);
+  renderLog();
+}
+
+function renderTopbar() {
+  document.getElementById('day-display').textContent = `Day ${STATE.day} of ${STATE.maxDays}`;
+  const pct = Math.round(STATE.morale);
+  document.getElementById('morale-bar').style.width = pct + '%';
+  document.getElementById('morale-bar').style.background = pct < 30 ? 'var(--red2)' : pct < 50 ? 'var(--amber)' : 'var(--teal2)';
+  document.getElementById('morale-val').textContent = pct;
+  document.getElementById('morale-val').style.color = pct < 30 ? 'var(--red2)' : pct < 50 ? 'var(--amber)' : 'var(--teal2)';
+
+  const rp = Math.round(STATE.rescueChance);
+  document.getElementById('rescue-bar').style.width = rp + '%';
+  document.getElementById('rescue-pct').textContent = rp + '%';
+}
+
+function renderResources() {
+  const row = document.getElementById('resources-row');
+  const dailyFoodUse = -8;
+  const dailyWaterUse = -6;
+  row.innerHTML = `
+    <div class="res-cell">
+      <div class="res-icon" style="color:var(--amber)">▲</div>
+      <div class="res-val">${Math.round(STATE.food)}</div>
+      <div class="res-lbl">Calories</div>
+      <div class="res-delta" style="color:${STATE.food < 10 ? 'var(--red2)' : 'var(--amber)'}">${dailyFoodUse}/day</div>
+    </div>
+    <div class="res-cell">
+      <div class="res-icon" style="color:var(--blue)">◆</div>
+      <div class="res-val">${Math.round(STATE.water)}L</div>
+      <div class="res-lbl">Water</div>
+      <div class="res-delta" style="color:${STATE.water < 8 ? 'var(--red2)' : 'var(--teal2)'}">${dailyWaterUse}/day</div>
+    </div>
+    <div class="res-cell">
+      <div class="res-icon" style="color:#97c459">■</div>
+      <div class="res-val">${Math.round(STATE.wood)}</div>
+      <div class="res-lbl">Wood</div>
+      <div class="res-delta" style="color:var(--text2)">stock</div>
+    </div>
+    <div class="res-cell">
+      <div class="res-icon" style="color:var(--lena)">◆</div>
+      <div class="res-val">${Math.round(STATE.salvage)}</div>
+      <div class="res-lbl">Salvage</div>
+      <div class="res-delta" style="color:var(--red2)">limited</div>
+    </div>`;
+}
+
+function renderChars() {
+  const row = document.getElementById('chars-row');
+  row.innerHTML = '';
+  const showAll = MODE === 'leader';
+  const chars = showAll ? Object.keys(CHARS) : [PLAYER_CHAR];
+  const gridCols = showAll ? 4 : 1;
+  row.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+
+  chars.forEach(id => {
+    const c = CHARS[id];
+    const assigned = ASSIGNMENTS[id];
+    const energy = STATE.energies[id];
+    const morale = Math.round(STATE.morale_chars[id]);
+    const injury = STATE.injuries && STATE.injuries[id];
+    const illness = STATE.illnesses && STATE.illnesses[id];
+    const isSelected = SELECTED_CHAR === id;
+    const isWarning = morale < 35 || injury || illness;
+
+    const div = document.createElement('div');
+    div.className = 'char-cell' + (assigned ? ' assigned' : '') + (isSelected ? ' selected' : '') + (isWarning ? ' warning' : '');
+    div.innerHTML = `
+      <div class="char-initials" style="color:${c.color}">${c.init}</div>
+      <div class="char-name-sm">${c.name}</div>
+      <div class="char-task-sm ${assigned ? 'active' : ''}" id="task-sm-${id}">
+        ${injury ? '🤕 injured' : illness ? '🤒 ill' : assigned ? TASKS.find(t=>t.id===assigned)?.label || '' : '— unassigned —'}
+      </div>
+      <div class="energy-bar"><div class="energy-fill" style="width:${Math.round(energy/10*100)}%;background:${c.color}"></div></div>
+      <div class="char-mood-sm" style="color:${morale<35?'var(--red2)':morale<55?'var(--amber)':'var(--teal2)'}">
+        ${morale<35?'▼':morale>70?'▲':'—'} morale: ${morale}
+      </div>`;
+    div.onclick = () => selectChar(id);
+    row.appendChild(div);
+  });
+}
+
+function selectChar(id) {
+  if(STATE.injuries[id] > 0 || STATE.illnesses[id] > 0) return;
+  SELECTED_CHAR = id;
+  const c = CHARS[id];
+  renderTaskPanel(id);
+  renderChars();
+}
+
+const TASK_DEFS = TASKS.map(t => ({ id:t.id, label:t.label, cost:t.cost }));
+
+function renderTaskPanel(charId) {
+  const label = document.getElementById('task-label');
+  const hint = document.getElementById('task-panel-hint');
+  const grid = document.getElementById('task-grid');
+
+  if(!charId) {
+    label.textContent = 'Select a survivor to assign a task';
+    hint.textContent = 'Click any character card above';
+    hint.style.display = '';
+    grid.style.display = 'none';
+    return;
+  }
+
+  const c = CHARS[charId];
+  label.textContent = `Assign task to ${c.name}`;
+  hint.textContent = c.weakness;
+  hint.style.display = '';
+  grid.style.display = 'grid';
+  grid.innerHTML = '';
+
+  TASK_DEFS.forEach(t => {
+    const isAssigned = ASSIGNMENTS[charId] === t.id;
+    const btn = document.createElement('div');
+    btn.className = 'task-btn' + (isAssigned ? ' assigned' : '');
+    btn.innerHTML = `<div class="task-btn-title">${t.label}</div><div class="task-btn-cost">${t.cost}</div>`;
+    btn.onclick = () => {
+      if(isAssigned) { delete ASSIGNMENTS[charId]; }
+      else { ASSIGNMENTS[charId] = t.id; }
+      renderChars();
+      renderTaskPanel(charId);
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function renderLog() {
+  const el = document.getElementById('log-entries');
+  el.innerHTML = LOGS.length
+    ? LOGS.map(l => `<div class="log-entry ${l.cls}">Day ${l.day}: ${l.msg}</div>`).join('')
+    : '<div class="log-entry">Day 1: Your plane has gone down. You\'re alive. For now.</div>';
+}
+
+// ═══════════════════════════════════════════════
+//  DAY END LOGIC
+// ═══════════════════════════════════════════════
+function endDay() {
+  const s = STATE;
+
+  // Resolve tasks
+  Object.entries(ASSIGNMENTS).forEach(([charId, taskId]) => {
+    const task = TASKS.find(t => t.id === taskId);
+    if(!task) return;
+    s.assignments[charId] = taskId;
+
+    // Energy cost
+    const costs = {'gather-food':-3,'gather-wood':-3,'fetch-water':-2,'build':-4,'morale':-1,'rest':4,'signal':-2,'explore':-3};
+    s.energies[charId] = Math.max(0, Math.min(10, s.energies[charId] + (costs[taskId] || -2)));
+
+    task.effect(s);
+  });
+
+  // Daily consumption
+  s.food = Math.max(0, s.food - 8);
+  s.water = Math.max(0, s.water - 6);
+
+  // Energy recovery for unassigned
+  Object.keys(CHARS).forEach(id => {
+    if(!ASSIGNMENTS[id]) s.energies[id] = Math.min(10, s.energies[id] + 2);
+  });
+
+  // Morale decay and modifiers
+  s.morale = Math.max(0, s.morale - 3);
+  if(s.food < 4) { s.morale -= 5; addLog(s, 'Hunger is hitting morale hard.', 'bad'); }
+  if(s.water < 4) { s.morale -= 8; addLog(s, 'Dehydration is becoming dangerous.', 'bad'); }
+  Object.keys(CHARS).forEach(id => {
+    s.morale_chars[id] = Math.max(0, Math.min(100, s.morale_chars[id] + (Math.random()*6 - 3)));
+  });
+  if(ASSIGNMENTS.sam === 'morale') s.morale_chars.sam = Math.min(100, s.morale_chars.sam + 8);
+
+  // Injury recovery
+  if(s.injuries) Object.keys(s.injuries).forEach(id => { if(s.injuries[id]>0) s.injuries[id]--; });
+  if(s.illnesses) Object.keys(s.illnesses).forEach(id => { if(s.illnesses[id]>0) s.illnesses[id]--; });
+
+  // Build completions
+  if(s.buildProgress >= 8 && !s.shelterBuilt) {
+    s.shelterBuilt = true; s.buildProgress = 0;
+    addLog(s, 'Shelter frame complete! Weather protection active.', 'good');
+  }
+  if(s.buildProgress >= 3 && s.shelterBuilt && !s.waterFilter) {
+    s.waterFilter = true; s.buildProgress = 0;
+    addLog(s, 'Water filter built! No more illness risk from water.', 'good');
+  }
+  if(s.buildProgress >= 3 && s.waterFilter && !s.signalFireBuilt) {
+    s.signalFireBuilt = true; s.buildProgress = 0;
+    s.rescueChance = Math.min(95, s.rescueChance + 20);
+    addLog(s, 'Signal fire lit! Rescue chance surged.', 'good');
+  }
+
+  // Rescue check
+  if(Math.random() * 100 < s.rescueChance) {
+    showRescueScore();
+    return;
+  }
+
+  s.day++;
+  if(s.day > s.maxDays) { showRescueScore(false); return; }
+
+  // Crisis roll (1 in 4 chance)
+  const crisisRoll = Math.random();
+  const crisisThreshold = s.shelterBuilt ? 0.22 : 0.28;
+  if(crisisRoll < crisisThreshold) {
+    const event = CRISIS_DECK[Math.floor(Math.random()*CRISIS_DECK.length)];
+    showCrisis(event);
+  } else {
+    ASSIGNMENTS = {};
+    SELECTED_CHAR = null;
+    buildGameUI();
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  CRISIS
+// ═══════════════════════════════════════════════
+function showCrisis(event) {
+  document.getElementById('crisis-type').textContent = event.type;
+  document.getElementById('crisis-title').textContent = event.title;
+  document.getElementById('crisis-desc').textContent = event.desc;
+  document.getElementById('crisis-status').textContent = event.status(STATE);
+
+  const optsEl = document.getElementById('crisis-opts');
+  optsEl.innerHTML = '';
+  event.opts.forEach(opt => {
+    const btn = document.createElement('div');
+    const isGood = opt.good(STATE);
+    btn.className = 'crisis-opt' + (isGood ? ' opt-good' : '');
+    btn.innerHTML = `<strong>${opt.label}</strong>${opt.text}`;
+    btn.onclick = () => {
+      opt.fn(STATE);
+      ASSIGNMENTS = {};
+      SELECTED_CHAR = null;
+      buildGameUI();
+      showScreen('s-game');
+    };
+    optsEl.appendChild(btn);
+  });
+  showScreen('s-crisis');
+}
+
+// ═══════════════════════════════════════════════
+//  SCORE
+// ═══════════════════════════════════════════════
+function showRescueScore(rescued=true) {
+  const s = STATE;
+  const dayScore = rescued ? Math.round(Math.max(0, (1 - (s.day - 1) / s.maxDays)) * 30) : 0;
+  const healthScore = Math.round(Object.values(s.energies).reduce((a,b)=>a+b,0)/40 * 25);
+  const moraleScore = Math.round(s.morale / 100 * 20);
+  const efficiencyScore = Math.round(Math.min(1, (s.food + s.water) / 20) * 15);
+  const crisisBonus = s.shelterBuilt && s.waterFilter ? 10 : s.shelterBuilt ? 5 : 0;
+  const total = Math.min(100, dayScore + healthScore + moraleScore + efficiencyScore + crisisBonus);
+
+  const grade = total >= 90 ? 'A · Master Operator' : total >= 80 ? 'B+ · Strong Operator' : total >= 70 ? 'B · Competent Leader' : total >= 60 ? 'C+ · Learning Fast' : 'C · Room to Grow';
+
+  document.getElementById('score-big').textContent = total;
+  document.getElementById('score-grade').textContent = grade;
+  document.getElementById('score-sub').textContent = rescued ? `Rescued on day ${s.day - 1}` : 'Day 30 reached — never rescued';
+
+  const dims = [
+    {label:'Speed', score: dayScore, max: 30, color:'var(--teal2)'},
+    {label:'Team health', score: healthScore, max: 25, color:'var(--teal2)'},
+    {label:'Morale', score: moraleScore, max: 20, color:'var(--amber)'},
+    {label:'Efficiency', score: efficiencyScore, max: 15, color:'var(--amber)'},
+    {label:'Preparation', score: crisisBonus, max: 10, color:'var(--lena)'},
+  ];
+  document.getElementById('score-dims').innerHTML = dims.map(d => `
+    <div class="score-dim-row">
+      <span class="score-dim-lbl">${d.label}</span>
+      <div class="score-dim-track"><div class="score-dim-fill" style="width:${Math.round(d.score/d.max*100)}%;background:${d.color}"></div></div>
+      <span class="score-dim-val">${d.score}/${d.max}</span>
+    </div>`).join('');
+
+  const debrief = [];
+  if(s.shelterBuilt) debrief.push('✓ Shelter built — good operational preparation.');
+  else debrief.push('✗ No shelter built — crisis damage was unmitigated. Build Tier 1 items first.');
+  if(s.signalFireBuilt) debrief.push('✓ Signal fire lit — excellent rescue signalling.');
+  else debrief.push('✗ No signal fire — rescue probability stayed low. Prioritise signalling infrastructure.');
+  if(s.morale > 60) debrief.push('✓ Morale maintained well — team productivity stayed high.');
+  else debrief.push('✗ Morale fell low — stakeholder management gap. Assign Sam to morale tasks.');
+  if(s.food > 5) debrief.push('✓ Food security maintained throughout.');
+  else debrief.push('✗ Food ran critically low — allocate Rex to foraging earlier.');
+  debrief.push('→ Business lesson: comparative advantage matters. Rex on builds = 2× output vs anyone else.');
+
+  document.getElementById('debrief-items').innerHTML = debrief.map(d =>
+    `<div class="debrief-item">${d}</div>`).join('');
+
+  showScreen('s-score');
+}
+
+function showHint() {
+  const s = STATE;
+  const hints = [];
+  if(s.food < 10) hints.push('Food is low — send Rex to gather food (2× output vs others).');
+  if(s.water < 8) hints.push('Water is critical — assign someone to fetch water immediately.');
+  if(!s.shelterBuilt && s.wood < 8) hints.push('You need 8 wood to build shelter. Send Rex to gather wood.');
+  if(!s.shelterBuilt && s.wood >= 8) hints.push('You have enough wood — assign Rex to build now.');
+  if(!s.signalFireBuilt && s.shelterBuilt) hints.push('Shelter is built! Build the signal fire next (+20% rescue/day).');
+  if(s.morale_chars.sam < 40) hints.push('Sam\'s morale is dropping — assign them to \'Boost morale\' soon.');
+  if(!ASSIGNMENTS.lena) hints.push('Lena is unassigned — her morale tanks team morale. Give her Explore or Build.');
+  if(hints.length === 0) hints.push('Looking good — keep building signal infrastructure and monitoring morale.');
+  alert('Hint: ' + hints[0]);
+}
+
+function goIntro() { showScreen('s-intro'); }
+function restartGame() { initState(); buildGameUI(); showScreen('s-game'); }
+
+// Init
+initState();
+</script>
+</body>
+</html>
