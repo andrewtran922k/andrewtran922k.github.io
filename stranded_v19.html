@@ -1,0 +1,3624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stranded — BREW Business Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   STRANDED v11 — 8-BIT / PIXEL RPG THEME
+   + Stat bars on every character card in the task screen
+================================================================ */
+:root {
+  /* Core palette */
+  --black:   #0f0f0f;
+  --dark1:   #1a1c2c;
+  --dark2:   #212640;
+  --dark3:   #2d3153;
+  --mid:     #3d4166;
+  --blue:    #5a6fa8;
+  --blue2:   #7b92c8;
+  --sky:     #a8c8f8;
+  --white:   #f0f0f0;
+  --cream:   #fff8e8;
+  --yellow:  #f8d800;
+  --gold:    #d8a000;
+  --orange:  #f87800;
+  --red:     #e83030;
+  --red2:    #ff6060;
+  --green:   #38b038;
+  --green2:  #68d868;
+  --green3:  #a8f0a8;
+  --teal:    #28c8a0;
+  --teal2:   #60e8c8;
+  --purple:  #7840c8;
+  --purple2: #b870f8;
+  --sand:    #d8c890;
+  --brown:   #885820;
+
+  /* Character colours */
+  --maya-c:  #38d888;
+  --rex-c:   #f8a800;
+  --lena-c:  #60b8f8;
+  --sam-c:   #f87060;
+
+  /* Functional */
+  --bg:      var(--dark1);
+  --panel:   var(--dark2);
+  --panel2:  var(--dark3);
+  --border:  var(--mid);
+  --border2: var(--blue);
+  --text:    var(--cream);
+  --muted:   var(--blue2);
+  --dim:     var(--mid);
+
+  --px: 2px;   /* pixel border size */
+  --font-px: 'Press Start 2P', monospace;
+  --font-txt: 'VT323', monospace;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { image-rendering: pixelated; }
+body {
+  font-family: var(--font-txt);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 20px;
+  line-height: 1.4;
+  -webkit-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+/* ── PIXEL BORDER MIXIN ──
+   Classic NES window box: solid outer border + inset highlight */
+.px-box {
+  border: var(--px) solid var(--blue);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--dark3);
+  background: var(--panel);
+}
+.px-box-light {
+  border: var(--px) solid var(--blue2);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--dark2);
+  background: var(--panel2);
+}
+.px-box-gold {
+  border: var(--px) solid var(--yellow);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--gold);
+  background: var(--dark2);
+}
+.px-box-red {
+  border: var(--px) solid var(--red);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--dark1);
+  background: #1a0a0a;
+}
+.px-box-green {
+  border: var(--px) solid var(--green);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--dark1);
+  background: #0a160a;
+}
+
+/* ── PIXEL HEADING ── */
+.px-title {
+  font-family: var(--font-px);
+  color: var(--yellow);
+  text-shadow:
+    var(--px) var(--px) 0 var(--brown),
+    calc(var(--px)*2) calc(var(--px)*2) 0 var(--black);
+  letter-spacing: 0.05em;
+}
+.px-title-sm {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--sky);
+  text-shadow: var(--px) var(--px) 0 var(--dark1);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.px-label {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--blue2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── PIXEL BUTTON ── */
+.px-btn {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--black);
+  background: var(--yellow);
+  border: var(--px) solid var(--black);
+  box-shadow:
+    var(--px) var(--px) 0 var(--black),
+    inset var(--px) var(--px) 0 rgba(255,255,255,0.3),
+    inset calc(-1*var(--px)) calc(-1*var(--px)) 0 var(--gold);
+  padding: 10px 18px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  transition: transform 0.08s, box-shadow 0.08s;
+  display: inline-block;
+}
+.px-btn:hover {
+  background: var(--cream);
+  transform: translate(calc(-1*var(--px)), calc(-1*var(--px)));
+  box-shadow:
+    calc(var(--px)*2) calc(var(--px)*2) 0 var(--black),
+    inset var(--px) var(--px) 0 rgba(255,255,255,0.5),
+    inset calc(-1*var(--px)) calc(-1*var(--px)) 0 var(--gold);
+}
+.px-btn:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow:
+    0 0 0 var(--black),
+    inset var(--px) var(--px) 0 var(--gold);
+}
+.px-btn-green {
+  background: var(--green);
+  color: var(--black);
+  box-shadow:
+    var(--px) var(--px) 0 var(--black),
+    inset var(--px) var(--px) 0 var(--green3),
+    inset calc(-1*var(--px)) calc(-1*var(--px)) 0 #186018;
+}
+.px-btn-green:hover { background: var(--green2); }
+.px-btn-ghost {
+  background: transparent;
+  color: var(--sky);
+  border-color: var(--blue2);
+  box-shadow: var(--px) var(--px) 0 var(--black);
+}
+.px-btn-ghost:hover { background: var(--dark3); color: var(--cream); }
+.px-btn-sm {
+  font-size: 7px;
+  padding: 6px 10px;
+}
+.px-btn-full { width: 100%; text-align: center; }
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── SCREEN TRANSITIONS ── */
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes screen-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes screen-flash {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.screen.active { animation: screen-in 0.22s ease-out both; }
+#s-game.active  { animation: screen-in-left 0.18s ease-out both; }
+#s-crisis.active { animation: screen-flash 0.25s ease-out both; }
+#s-score.active  { animation: screen-in 0.35s ease-out both; }
+
+/* Pixel scan-line overlay on transitions */
+@keyframes scanline-sweep {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(100vh); }
+}
+#transition-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px,
+    transparent 1px, transparent 3px
+  );
+  transition: opacity 0.1s;
+}
+#transition-overlay.flash { opacity: 1; }
+
+/* ─────────────────────────────────────────
+   INTRO SCREEN
+───────────────────────────────────────── */
+#s-intro {
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background:
+    linear-gradient(to bottom, rgba(15,15,15,0.55) 0%, rgba(26,28,44,0.80) 100%),
+    url('assets/backgrounds/island.png') center/cover no-repeat,
+    repeating-linear-gradient(0deg,   transparent, transparent 31px, rgba(90,111,168,0.07) 32px),
+    repeating-linear-gradient(90deg,  transparent, transparent 31px, rgba(90,111,168,0.07) 32px),
+    var(--dark1);
+}
+
+.intro-inner { max-width: 460px; width: 100%; text-align: center; }
+
+.intro-logo-wrap { margin-bottom: 1.5rem; }
+.intro-brew {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--teal2);
+  text-shadow: var(--px) var(--px) 0 var(--dark1);
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
+}
+
+.intro-title {
+  font-family: var(--font-px);
+  font-size: clamp(22px, 8vw, 38px);
+  color: var(--yellow);
+  text-shadow:
+    4px 4px 0 var(--brown),
+    6px 6px 0 var(--black);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.intro-title span { color: var(--green2); }
+
+/* Pixel star decorations */
+.intro-stars {
+  font-size: 14px;
+  color: var(--yellow);
+  letter-spacing: 12px;
+  margin: 8px 0 16px;
+  opacity: 0.7;
+}
+
+.intro-sub {
+  font-family: var(--font-txt);
+  font-size: 20px;
+  color: var(--sky);
+  margin-bottom: 1.8rem;
+  line-height: 1.5;
+}
+
+.save-notice {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--green2);
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  display: none;
+  line-height: 1.8;
+}
+
+.mode-section-label {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--blue2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.mode-card {
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: transform 0.1s;
+  text-align: left;
+}
+.mode-card:hover { transform: translate(-2px, -2px); }
+.mode-card.selected {
+  background: var(--dark3);
+  border-color: var(--yellow);
+  box-shadow:
+    0 0 0 var(--px) var(--black),
+    inset 0 0 0 var(--px) var(--gold),
+    var(--px) var(--px) 0 var(--black);
+}
+.mode-card h3 {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--cream);
+  margin-bottom: 8px;
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.mode-card.selected h3 { color: var(--yellow); }
+.mode-card p {
+  font-family: var(--font-txt);
+  font-size: 20px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Blinking cursor effect */
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+.blink { animation: blink 1s step-end infinite; }
+
+/* ── CURSOR ARROW decoration ── */
+.px-cursor::before {
+  content: '> ';
+  color: var(--yellow);
+  font-family: var(--font-px);
+}
+
+/* ─────────────────────────────────────────
+   CHAR SELECT
+───────────────────────────────────────── */
+#s-charsel {
+  padding: 1.5rem;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(90,111,168,0.05) 32px),
+    var(--dark1);
+}
+.charsel-header { text-align: center; margin-bottom: 1.2rem; padding-top: 0.5rem; }
+.charsel-header h2 {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--yellow);
+  text-shadow: 2px 2px 0 var(--brown), 4px 4px 0 var(--black);
+  margin-bottom: 8px;
+  letter-spacing: 0.06em;
+}
+.charsel-header p { font-family: var(--font-txt); font-size: 20px; color: var(--sky); }
+
+.char-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; max-width: 620px; margin: 0 auto 1.2rem; }
+.char-select-card { padding: 12px; cursor: pointer; transition: transform 0.1s; }
+.char-select-card:hover { transform: translate(-2px,-2px); }
+.char-select-card.selected {
+  border-color: var(--yellow) !important;
+  box-shadow: 0 0 0 2px var(--black), inset 0 0 0 2px var(--gold), 2px 2px 0 var(--black) !important;
+}
+.csc-weakness {
+  font-family: var(--font-txt);
+  font-size: 17px;
+  color: var(--sand);
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(232,48,48,0.07);
+  border-left: 3px solid var(--red);
+  line-height: 1.4;
+  font-style: italic;
+}
+.csc-weakness-lbl {
+  font-family: var(--font-px);
+  font-size: 6px;
+  color: var(--red2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-style: normal;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.csc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.csc-avatar {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-px); font-size: 9px; font-weight: 400;
+  flex-shrink: 0;
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.csc-name { font-family: var(--font-px); font-size: 10px; color: var(--cream); letter-spacing: 0.06em; }
+.csc-role { font-family: var(--font-px); font-size: 8px; color: var(--blue2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.csc-bio { font-family: var(--font-txt); font-size: 20px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+.stat-mini { display: flex; flex-direction: column; gap: 4px; }
+.stat-mini-row { display: flex; align-items: center; gap: 6px; }
+.stat-mini-lbl { font-family: var(--font-px); font-size: 7px; color: var(--dim); width: 52px; text-transform: uppercase; }
+.stat-mini-bar {
+  flex: 1; height: 6px;
+  background: var(--dark1);
+  border: 1px solid var(--black);
+  box-shadow: 1px 1px 0 var(--black);
+}
+.stat-mini-fill { height: 100%; }
+
+/* ─────────────────────────────────────────
+   TOPBAR
+───────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--dark1);
+  border-bottom: 4px solid var(--black);
+  flex-shrink: 0;
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0; right: 0;
+  height: 4px;
+  background: var(--blue);
+  opacity: 0.4;
+}
+
+.topbar-brand {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--yellow);
+  text-shadow: 1px 1px 0 var(--brown), 2px 2px 0 var(--black);
+  letter-spacing: 0.1em;
+}
+.topbar-day {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--sky);
+  letter-spacing: 0.06em;
+  text-shadow: 1px 1px 0 var(--dark1);
+}
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.morale-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--green2);
+  background: var(--dark2);
+  padding: 4px 10px;
+  border: 2px solid var(--green);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.morale-bar {
+  width: 40px;
+  height: 6px;
+  background: var(--dark1);
+  border: 1px solid var(--black);
+}
+.morale-fill {
+  height: 100%;
+  transition: width 0.4s, background 0.4s;
+}
+
+.save-btn {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--sky);
+  background: var(--dark2);
+  border: 2px solid var(--blue);
+  box-shadow: 2px 2px 0 var(--black);
+  padding: 4px 7px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.save-btn:hover { background: var(--dark3); color: var(--cream); }
+
+/* ─────────────────────────────────────────
+   RESCUE BAR
+───────────────────────────────────────── */
+.rescue-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--dark1);
+  border-bottom: 4px solid var(--black);
+  flex-shrink: 0;
+}
+.rescue-label {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.rescue-track {
+  flex: 1;
+  height: 8px;
+  background: var(--dark1);
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+  position: relative;
+  overflow: hidden;
+}
+/* Pixel-style segmented progress bar */
+.rescue-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(0,0,0,0.4) 7px, rgba(0,0,0,0.4) 8px);
+  pointer-events: none;
+  z-index: 1;
+}
+.rescue-fill {
+  height: 100%;
+  background: var(--yellow);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+  transition: width 0.6s;
+}
+.rescue-pct {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--yellow);
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 var(--black);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ─────────────────────────────────────────
+   GAME LAYOUT
+───────────────────────────────────────── */
+#s-game {
+  flex-direction: column;
+  background:
+    linear-gradient(to bottom, rgba(26,28,44,0.92) 0%, rgba(26,28,44,0.97) 100%),
+    url('assets/backgrounds/island.png') center/cover no-repeat fixed;
+}
+#s-dialogue {
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    linear-gradient(to bottom, rgba(15,15,15,0.7) 0%, rgba(26,28,44,0.85) 100%),
+    url('assets/backgrounds/island.png') center/cover no-repeat,
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(90,111,168,0.05) 32px),
+    var(--dark1);
+}
+.game-body { flex: 1; overflow-y: auto; }
+.game-inner { max-width: 680px; margin: 0 auto; padding: 10px 10px 80px; }
+
+/* ─────────────────────────────────────────
+   RESOURCES
+───────────────────────────────────────── */
+.resources-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.res-cell {
+  padding: 8px 8px 6px;
+  text-align: center;
+  cursor: default;
+}
+.res-cell.critical {
+  border-color: var(--red) !important;
+  background: #1a0808 !important;
+  animation: crit-flash 1s step-end infinite;
+}
+@keyframes crit-flash { 0%,100%{opacity:1} 50%{opacity:0.7} }
+.res-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.res-icon svg {
+  image-rendering: pixelated;
+  width: 28px;
+  height: 28px;
+}
+.res-val {
+  font-family: var(--font-px);
+  font-size: 14px;
+  color: var(--cream);
+  display: block;
+  text-shadow: 1px 1px 0 var(--black);
+  margin-bottom: 3px;
+}
+.res-cell.critical .res-val { color: var(--red2); }
+.res-lbl {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+}
+.res-delta {
+  font-family: var(--font-px);
+  font-size: 7px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ─────────────────────────────────────────
+   TABS
+───────────────────────────────────────── */
+.game-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.game-tab {
+  flex: 1;
+  padding: 8px 4px;
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: background 0.1s;
+}
+.game-tab:hover { background: var(--dark3); color: var(--sky); }
+.game-tab.active {
+  background: var(--dark3);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  box-shadow: 2px 2px 0 var(--black), inset 0 -2px 0 var(--gold);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* sec-lbl override */
+.sec-lbl {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--blue2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 10px 0 6px;
+}
+
+/* ─────────────────────────────────────────
+   CHARACTERS
+───────────────────────────────────────── */
+.chars-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.char-cell {
+  padding: 8px 6px;
+  cursor: pointer;
+  transition: transform 0.08s;
+  text-align: center;
+}
+.char-cell:hover { transform: translate(-2px,-2px); }
+.char-cell.selected {
+  border-color: var(--yellow) !important;
+  background: var(--dark3) !important;
+  box-shadow: 0 0 0 2px var(--black), inset 0 0 0 2px var(--gold), 2px 2px 0 var(--black) !important;
+}
+.char-cell.assigned { border-color: var(--green) !important; }
+.char-cell.warning  { border-color: var(--gold) !important; }
+.char-cell.injured  { border-color: var(--red) !important; opacity: 0.65; }
+
+/* ── STAT BARS inside char card ── */
+.char-stats {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.char-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.char-stat-lbl {
+  font-family: var(--font-px);
+  font-size: 5px;
+  text-transform: uppercase;
+  width: 28px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  text-align: right;
+  line-height: 1;
+}
+.char-stat-track {
+  flex: 1;
+  height: 5px;
+  background: var(--dark1);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.char-stat-fill {
+  height: 100%;
+  transition: width 0.4s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+.char-initials {
+  font-family: var(--font-px);
+  font-size: 10px;
+  font-weight: 400;
+  margin-bottom: 4px;
+  display: block;
+  text-shadow: 1px 1px 0 var(--black);
+}
+/* Portrait image in task card */
+.char-portrait-thumb {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 4px;
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+}
+/* Fallback initials shown when portrait not loaded */
+.char-initials-fallback {
+  font-family: var(--font-px);
+  font-size: 10px;
+  margin-bottom: 4px;
+  display: none; /* hidden when portrait is present */
+  text-shadow: 1px 1px 0 var(--black);
+}
+.char-name-sm {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--cream);
+  display: block;
+  margin-bottom: 2px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.char-task-sm {
+  font-family: var(--font-txt);
+  font-size: 18px;
+  color: var(--dim);
+  display: block;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+.char-task-sm.active {
+  color: var(--green2);
+  font-style: normal;
+}
+.char-task-sm.idle {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--yellow);
+  font-style: normal;
+  background: rgba(248,216,0,0.12);
+  border: 1px solid var(--gold);
+  padding: 2px 4px;
+  letter-spacing: 0.06em;
+  animation: blink 1.2s step-end infinite;
+}
+.energy-bar {
+  margin-top: 5px;
+  height: 5px;
+  background: var(--dark1);
+  border: 1px solid var(--black);
+  box-shadow: 1px 1px 0 var(--black);
+}
+.energy-fill { height: 100%; transition: width 0.4s; }
+.char-mood-sm {
+  font-family: var(--font-px);
+  font-size: 7px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ─────────────────────────────────────────
+   TASK PANEL  (RPG dialogue-box style)
+───────────────────────────────────────── */
+.task-panel { margin-bottom: 8px; }
+.task-panel-header {
+  padding: 8px 12px;
+  background: var(--dark1);
+  border-bottom: 2px solid var(--black);
+  position: relative;
+}
+/* Pixel corner decorations */
+.task-panel-header::before,
+.task-panel-header::after {
+  content: '*';
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--yellow);
+  position: absolute;
+  top: 6px;
+}
+.task-panel-header::before { left: 4px; }
+.task-panel-header::after  { right: 4px; }
+
+.task-panel-label {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--cream);
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin-bottom: 3px;
+}
+.task-panel-hint {
+  font-family: var(--font-txt);
+  font-size: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.task-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 8px;
+  background: var(--dark2);
+}
+.task-btn {
+  padding: 9px 10px;
+  cursor: pointer;
+  font-family: var(--font-px);
+  font-size: 0;  /* hide default text - use children */
+  background: var(--dark1);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+  text-align: left;
+  transition: transform 0.08s;
+}
+.task-btn:hover {
+  background: var(--dark3);
+  border-color: var(--blue2);
+  transform: translate(-1px,-1px);
+  box-shadow: 3px 3px 0 var(--black);
+}
+.task-btn.assigned {
+  background: #0a1808;
+  border-color: var(--green);
+  box-shadow: 2px 2px 0 var(--black), inset 0 0 0 1px rgba(56,176,56,0.2);
+}
+.task-btn.assigned:hover { transform: none; }
+.task-btn-title {
+  display: block;
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--cream);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.task-btn.assigned .task-btn-title { color: var(--green2); }
+.task-btn-title::before {
+  content: '> ';
+  color: var(--yellow);
+  font-size: 7px;
+}
+.task-btn.assigned .task-btn-title::before { color: var(--green2); }
+.task-btn-cost {
+  display: block;
+  font-family: var(--font-txt);
+  font-size: 19px;
+  color: var(--muted);
+}
+.task-btn.assigned .task-btn-cost { color: var(--green); }
+
+/* ─────────────────────────────────────────
+   CRAFTING
+───────────────────────────────────────── */
+.craft-panel { }
+.craft-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px 10px 8px;
+  border-bottom: 2px solid var(--black);
+}
+.craft-item:last-child { border-bottom: none; }
+.craft-item-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.craft-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: var(--dark1);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.craft-info { flex: 1; min-width: 0; }
+.craft-name {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.craft-turns {
+  font-family: var(--font-px);
+  font-size: 6px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Restaurant menu price row ── */
+.craft-prices {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(90,111,168,0.25);
+  gap: 0;
+}
+/* Dotted leader line between name area and price */
+.craft-menu-items {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.craft-menu-dots {
+  flex: 1;
+  border-bottom: 2px dotted rgba(90,111,168,0.35);
+  margin: 0 6px;
+  min-width: 16px;
+}
+.craft-menu-cost {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+/* Each resource cost: icon + number */
+.craft-cost-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.craft-cost-item svg {
+  width: 13px;
+  height: 13px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+.craft-cost-num {
+  font-family: var(--font-px);
+  font-size: 8px;
+  line-height: 1;
+}
+.craft-cost-num.ok   { color: var(--green2); }
+.craft-cost-num.low  { color: var(--red2); }
+/* Plus separator */
+.craft-cost-sep {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--dim);
+}
+.craft-progress-wrap { margin-top: 6px; }
+.craft-progress-bar {
+  height: 10px;
+  background: var(--dark1);
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black), inset 0 0 0 1px var(--dark3);
+  margin-top: 4px;
+  overflow: hidden;
+  position: relative;
+}
+/* Segmented pixel overlay */
+.craft-progress-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(0,0,0,0.35) 7px, rgba(0,0,0,0.35) 8px);
+  pointer-events: none;
+  z-index: 1;
+}
+.craft-progress-fill {
+  height: 100%;
+  background: var(--gold);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
+  transition: width 0.4s linear;
+  position: relative;
+}
+/* Animated shimmer on active build */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+.craft-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 20%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  animation: shimmer 1.6s linear infinite;
+}
+.craft-progress-lbl {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--gold);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.craft-progress-eta {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--teal2);
+}
+/* Active build glow on card */
+.craft-item.active-item {
+  background: rgba(216,160,0,0.06);
+  border-left: 3px solid var(--gold);
+}
+/* Real-time tick pulse on active bar */
+@keyframes bar-pulse {
+  0%,100% { box-shadow: inset 0 2px 0 rgba(255,255,255,0.3); }
+  50%      { box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 0 4px var(--gold); }
+}
+.craft-progress-fill.ticking { animation: bar-pulse 1s ease-in-out infinite; }
+.craft-btn {
+  flex-shrink: 0;
+  font-family: var(--font-px);
+  font-size: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: transform 0.08s;
+}
+.craft-btn.can { background: var(--green); color: var(--black); }
+.craft-btn.can:hover { background: var(--green2); transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--black); }
+.craft-btn.cant { background: var(--mid); color: var(--dark1); cursor: not-allowed; opacity: 0.6; }
+.craft-btn.built { background: var(--gold); color: var(--black); cursor: default; }
+.craft-btn.active-build { background: var(--dark1); color: var(--gold); border-color: var(--gold); }
+.craft-btn.cancel {
+  background: transparent;
+  color: var(--red2);
+  border-color: var(--red);
+  box-shadow: 2px 2px 0 var(--black);
+  margin-top: 4px;
+  font-size: 7px;
+  padding: 4px 8px;
+}
+.craft-btn.cancel:hover {
+  background: #1a0808;
+  color: var(--red2);
+  transform: translate(-1px,-1px);
+  box-shadow: 3px 3px 0 var(--black);
+}
+/* Active item side-by-side buttons */
+.craft-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.tier-label {
+  font-family: var(--font-px);
+  font-size: 7px;
+  padding: 2px 5px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tier-1 { background: #0a1808; color: var(--green2); border-color: var(--green); }
+.tier-2 { background: #1a1000; color: var(--gold); border-color: var(--gold); }
+.tier-3 { background: #140a20; color: var(--purple2); border-color: var(--purple); }
+
+/* ─────────────────────────────────────────
+   LOG
+───────────────────────────────────────── */
+.log-area { }
+.log-title {
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--sky);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 7px 10px;
+  border-bottom: 2px solid var(--black);
+  background: var(--dark1);
+}
+.log-entry {
+  font-family: var(--font-txt);
+  font-size: 22px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--black);
+  color: var(--muted);
+  line-height: 1.3;
+}
+.log-entry::before {
+  content: '> ';
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--mid);
+}
+.log-entry:last-child { border-bottom: none; }
+.log-entry.good { color: var(--green2); }
+.log-entry.good::before { color: var(--green); }
+.log-entry.warn { color: var(--gold); }
+.log-entry.warn::before { color: var(--gold); }
+.log-entry.bad { color: var(--red2); }
+.log-entry.bad::before { color: var(--red); }
+
+/* ─────────────────────────────────────────
+   BOTTOM BAR
+───────────────────────────────────────── */
+.bottom-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--dark1);
+  border-top: 4px solid var(--black);
+  flex-shrink: 0;
+}
+.btn-hint {
+  flex: 1;
+  padding: 11px;
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--sky);
+  background: var(--dark2);
+  border: 2px solid var(--blue);
+  box-shadow: 2px 2px 0 var(--black);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: transform 0.08s;
+}
+.btn-hint:hover { background: var(--dark3); transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--black); }
+.btn-end {
+  flex: 2;
+  padding: 11px;
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--black);
+  background: var(--green);
+  border: 2px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black), inset 0 2px 0 var(--green3);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.btn-end:hover {
+  background: var(--green2);
+  transform: translate(-2px,-2px);
+  box-shadow: 5px 5px 0 var(--black), inset 0 2px 0 var(--green3);
+}
+.btn-end:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--black); }
+
+/* ─────────────────────────────────────────
+   DIALOGUE SCREEN (RPG text box)
+───────────────────────────────────────── */
+.dialogue-card { max-width: 460px; width: 100%; }
+
+/* Speaker portrait box */
+.dialogue-speaker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-bottom: 0;
+  border-bottom: 4px solid var(--black);
+}
+.dialogue-avatar {
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-px); font-size: 12px;
+  flex-shrink: 0;
+  border: 2px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black);
+  position: relative;
+  overflow: hidden;
+}
+/* Portrait image inside avatar — shown when src is set */
+.dialogue-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: none; /* hidden until loaded */
+}
+.dialogue-avatar img.loaded { display: block; }
+/* Large portrait beside dialogue box */
+.dialogue-portrait-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: -4px;
+}
+.dialogue-portrait {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  border: 2px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black);
+  display: none;
+  object-fit: cover;
+}
+.dialogue-portrait.loaded { display: block; }
+.dialogue-speaker-name {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--yellow);
+  text-shadow: 1px 1px 0 var(--black);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.dialogue-speaker-role {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--blue2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Main text window — classic RPG dialogue box */
+.dialogue-body {
+  padding: 14px;
+  background: var(--dark1);
+  border-top: none;
+}
+.dialogue-text {
+  font-family: var(--font-txt);
+  font-size: 24px;
+  color: var(--cream);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: inset 2px 2px 0 var(--dark1);
+  position: relative;
+}
+/* Blinking continue arrow */
+.dialogue-text::after {
+  content: 'v';
+  position: absolute;
+  bottom: 6px; right: 10px;
+  font-family: var(--font-px);
+  font-size: 6px;
+  color: var(--yellow);
+  animation: blink 0.8s step-end infinite;
+}
+.dialogue-subtext {
+  font-family: var(--font-txt);
+  font-size: 21px;
+  color: var(--sky);
+  margin-bottom: 12px;
+  line-height: 1.5;
+  padding: 6px 10px;
+  border-left: 3px solid var(--blue);
+  background: rgba(90,111,168,0.08);
+}
+.dialogue-choices { display: flex; flex-direction: column; gap: 5px; }
+.dialogue-choice {
+  padding: 9px 12px;
+  cursor: pointer;
+  font-family: var(--font-txt);
+  font-size: 22px;
+  color: var(--cream);
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+  text-align: left;
+  transition: transform 0.08s;
+}
+.dialogue-choice::before {
+  content: '> ';
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--yellow);
+}
+.dialogue-choice:hover {
+  background: var(--dark3);
+  border-color: var(--yellow);
+  transform: translate(-2px,-2px);
+  box-shadow: 4px 4px 0 var(--black);
+}
+
+/* ─────────────────────────────────────────
+   DAY REPORT SCREEN
+───────────────────────────────────────── */
+#s-dayreport {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1.2rem 1rem 2rem;
+  overflow-y: auto;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(90,111,168,0.05) 32px),
+    var(--dark1);
+}
+.dayreport-card { max-width: 480px; width: 100%; margin: 0 auto; }
+
+/* Header */
+.dayreport-header {
+  text-align: center;
+  padding: 14px 12px 10px;
+  border-bottom: 4px solid var(--black);
+  background: var(--dark2);
+  margin-bottom: 8px;
+}
+.dayreport-day {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 4px;
+}
+.dayreport-title {
+  font-family: var(--font-px);
+  font-size: 16px;
+  color: var(--yellow);
+  text-shadow: 2px 2px 0 var(--brown), 4px 4px 0 var(--black);
+  letter-spacing: 0.06em;
+}
+
+/* Section label */
+.dr-section-lbl {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--blue2);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 6px 8px 4px;
+  background: var(--dark1);
+  border-bottom: 2px solid var(--black);
+  margin-top: 8px;
+}
+
+/* Resources summary */
+.dr-resources {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+.dr-res-cell {
+  padding: 8px 4px 6px;
+  text-align: center;
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.dr-res-cell.crit {
+  border-color: var(--red);
+  background: #1a0808;
+  animation: crit-flash 1s step-end infinite;
+}
+.dr-res-icon { display:flex; align-items:center; justify-content:center; margin-bottom:3px; }
+.dr-res-icon svg { width:22px; height:22px; image-rendering:pixelated; }
+.dr-res-val {
+  font-family: var(--font-px);
+  font-size: 12px;
+  color: var(--cream);
+  display: block;
+  text-shadow: 1px 1px 0 var(--black);
+}
+.dr-res-cell.crit .dr-res-val { color: var(--red2); }
+.dr-res-delta {
+  font-family: var(--font-px);
+  font-size: 6px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Rescue bar */
+.dr-rescue-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px;
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+  margin-top: 4px;
+}
+.dr-rescue-lbl {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--gold);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.dr-rescue-track {
+  flex: 1;
+  height: 8px;
+  background: var(--dark1);
+  border: 2px solid var(--black);
+  position: relative;
+  overflow: hidden;
+}
+.dr-rescue-track::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 7px,rgba(0,0,0,0.4) 7px,rgba(0,0,0,0.4) 8px);
+  pointer-events:none;
+  z-index:1;
+}
+.dr-rescue-fill {
+  height:100%;
+  background:var(--yellow);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.4);
+  transition:width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.dr-rescue-pct {
+  font-family:var(--font-px);
+  font-size:9px;
+  color:var(--yellow);
+  white-space:nowrap;
+  min-width:32px;
+  text-align:right;
+  text-shadow:1px 1px 0 var(--black);
+}
+
+/* Character summary cards */
+.dr-chars { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-top:4px; }
+.dr-char-card {
+  padding: 6px 4px;
+  text-align: center;
+  background: var(--dark2);
+  border: 2px solid var(--mid);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.dr-char-card.warning { border-color: var(--gold); }
+.dr-char-card.injured { border-color: var(--red); opacity:0.8; }
+.dr-char-portrait {
+  width: 40px; height: 40px;
+  image-rendering: pixelated;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 4px;
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.dr-char-name {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--cream);
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dr-char-task {
+  font-family: var(--font-txt);
+  font-size: 16px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 4px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dr-char-task.active { color: var(--green2); font-style: normal; }
+.dr-char-task.idle   { color: var(--red2); }
+.dr-bar-row { display:flex; align-items:center; gap:3px; margin-bottom:2px; }
+.dr-bar-lbl { font-family:var(--font-px); font-size:5px; color:var(--dim); width:22px; text-align:right; flex-shrink:0; }
+.dr-bar-track { flex:1; height:4px; background:var(--dark1); border:1px solid rgba(0,0,0,0.5); overflow:hidden; }
+.dr-bar-fill  { height:100%; transition:width 0.5s; }
+
+/* Events log */
+.dr-events { margin-top:4px; }
+.dr-event-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--black);
+  font-family: var(--font-txt);
+  font-size: 20px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.dr-event-item:last-child { border-bottom:none; }
+.dr-event-icon { font-family:var(--font-px); font-size:8px; flex-shrink:0; padding-top:2px; }
+.dr-event-icon.good { color:var(--green2); }
+.dr-event-icon.bad  { color:var(--red2); }
+.dr-event-icon.warn { color:var(--gold); }
+.dr-event-item.good { color:var(--green3); }
+.dr-event-item.bad  { color:var(--red2); }
+.dr-event-item.warn { color:var(--sand); }
+
+/* Continue button */
+.dr-continue-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  font-family: var(--font-px);
+  font-size: 9px;
+  color: var(--black);
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black), inset 0 2px 0 rgba(255,255,255,0.3);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.dr-continue-btn:hover {
+  background: var(--cream);
+  transform: translate(-2px,-2px);
+  box-shadow: 5px 5px 0 var(--black);
+}
+.dr-continue-btn:active { transform:translate(1px,1px); box-shadow:1px 1px 0 var(--black); }
+#s-crisis {
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 14px, rgba(232,48,48,0.03) 14px, rgba(232,48,48,0.03) 16px),
+    var(--dark1);
+}
+.crisis-card { max-width: 460px; width: 100%; }
+.crisis-header { padding: 12px 14px; border-bottom: 4px solid var(--black); background: #1a0404; }
+.crisis-type-badge {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--red2);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.crisis-type-badge::before {
+  content: '!!';
+  background: var(--red);
+  color: var(--black);
+  font-size: 6px;
+  padding: 1px 4px;
+  font-family: var(--font-px);
+  animation: blink 0.6s step-end infinite;
+}
+.crisis-card h2 {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--red2);
+  text-shadow: 2px 2px 0 var(--black);
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.crisis-body { padding: 12px 14px; }
+.crisis-desc {
+  font-family: var(--font-txt);
+  font-size: 22px;
+  color: var(--sand);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.crisis-status {
+  font-family: var(--font-px);
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--gold);
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  background: #1a1200;
+  border: 2px solid var(--gold);
+  box-shadow: 2px 2px 0 var(--black);
+  line-height: 1.8;
+}
+.crisis-opts { display: flex; flex-direction: column; gap: 6px; }
+.crisis-opt {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: var(--font-txt);
+  font-size: 22px;
+  background: #140808;
+  border: 2px solid var(--red);
+  box-shadow: 2px 2px 0 var(--black);
+  color: var(--sand);
+  text-align: left;
+  line-height: 1.4;
+  transition: transform 0.08s;
+}
+.crisis-opt:hover {
+  background: #1f0a0a;
+  transform: translate(-2px,-2px);
+  box-shadow: 4px 4px 0 var(--black);
+}
+.crisis-opt.opt-good {
+  border-color: var(--green);
+  background: #0a1808;
+  color: var(--green3);
+}
+.crisis-opt.opt-good:hover { background: #0d2010; border-color: var(--green2); }
+.crisis-opt strong {
+  display: block;
+  font-family: var(--font-px);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.crisis-opt.opt-good strong { color: var(--green2); }
+
+/* ─────────────────────────────────────────
+   SCORE SCREEN
+───────────────────────────────────────── */
+#s-score {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(90,111,168,0.06) 32px),
+    var(--dark1);
+}
+.score-card { max-width: 460px; width: 100%; margin: 0 auto; }
+
+/* Trophy/medal header */
+.score-header { text-align: center; margin-bottom: 1.2rem; }
+.score-lbl {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 10px;
+}
+.score-big {
+  font-family: var(--font-px);
+  font-size: 52px;
+  color: var(--yellow);
+  text-shadow: 4px 4px 0 var(--brown), 6px 6px 0 var(--black);
+  line-height: 1;
+  display: block;
+  margin-bottom: 8px;
+}
+.score-grade {
+  font-family: var(--font-px);
+  font-size: 11px;
+  color: var(--green2);
+  text-shadow: 1px 1px 0 var(--black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.score-sub {
+  font-family: var(--font-txt);
+  font-size: 22px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.score-dims-card { margin-bottom: 8px; }
+.score-dims { display: flex; flex-direction: column; gap: 7px; padding: 10px; }
+.score-dim-row { display: flex; align-items: center; gap: 8px; }
+.score-dim-lbl {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--sky);
+  width: 88px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.score-dim-track {
+  flex: 1;
+  height: 8px;
+  background: var(--dark1);
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 var(--black);
+  overflow: hidden;
+  position: relative;
+}
+.score-dim-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(0,0,0,0.25) 5px, rgba(0,0,0,0.25) 6px);
+  pointer-events: none;
+}
+.score-dim-fill {
+  height: 100%;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+.score-dim-val {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--cream);
+  width: 30px;
+  text-align: right;
+}
+.debrief-box { margin-bottom: 10px; }
+.debrief-title {
+  font-family: var(--font-px);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sky);
+  padding: 7px 10px;
+  border-bottom: 2px solid var(--black);
+  background: var(--dark1);
+}
+.debrief-item {
+  font-family: var(--font-txt);
+  font-size: 21px;
+  color: var(--sky);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--black);
+  line-height: 1.4;
+}
+.debrief-item:last-child { border-bottom: none; }
+.score-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* ── CONSEQUENCES PANEL ── */
+.consequence-box { margin-bottom: 8px; }
+.consequence-title {
+  font-family: var(--font-px);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sky);
+  padding: 7px 10px;
+  border-bottom: 2px solid var(--black);
+  background: var(--dark1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.consequence-title::before {
+  content: '>>>';
+  color: var(--yellow);
+  font-family: var(--font-px);
+  font-size: 7px;
+}
+.consequence-item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 0 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--black);
+  line-height: 1.4;
+}
+.consequence-item:last-child { border-bottom: none; }
+.consequence-icon {
+  font-family: var(--font-px);
+  font-size: 9px;
+  padding-top: 2px;
+  text-align: center;
+}
+.consequence-icon.good  { color: var(--green2); }
+.consequence-icon.bad   { color: var(--red2); }
+.consequence-icon.warn  { color: var(--gold); }
+.consequence-icon.info  { color: var(--sky); }
+.consequence-decision {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: var(--cream);
+  margin-bottom: 3px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.consequence-result {
+  font-family: var(--font-txt);
+  font-size: 19px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.consequence-result em {
+  font-style: normal;
+  color: var(--sand);
+}
+.btn-replay {
+  padding: 12px;
+  font-family: var(--font-px);
+  font-size: 9px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 2px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black);
+  transition: transform 0.08s;
+}
+.btn-replay:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--black); }
+.btn-replay:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--black); }
+.btn-replay.primary { background: var(--green); color: var(--black); }
+.btn-replay.secondary { background: var(--dark2); color: var(--sky); border-color: var(--blue); }
+</style>
+</head>
+<body>
+<div id="transition-overlay"></div>
+
+<!-- INTRO -->
+<div class="screen active" id="s-intro">
+  <div class="intro-inner">
+    <div class="intro-brew">BREW Business Academy</div>
+    <div class="px-box" style="padding:20px 16px;margin-bottom:16px;">
+      <div class="intro-title">STRAND<span>ED</span></div>
+      <div class="intro-stars">* * * * *</div>
+      <p class="intro-sub">Four survivors. One island.<br>Every decision teaches business.</p>
+    </div>
+    <div class="save-notice px-box-green" id="save-notice"></div>
+    <div class="mode-section-label">Select mode</div>
+    <div class="mode-cards">
+      <div class="mode-card px-box selected" id="mode-leader" onclick="selectMode('leader')">
+        <h3>Leadership</h3>
+        <p>Command all four.<br>Full visibility.</p>
+      </div>
+      <div class="mode-card px-box" id="mode-coop" onclick="selectMode('coop')">
+        <h3>Co-op</h3>
+        <p>Play as one<br>character.</p>
+      </div>
+    </div>
+    <button class="px-btn px-btn-green px-btn-full" onclick="startGame()" style="padding:13px;font-size:9px;">
+      <span class="blink">&#9654;</span> Begin Survival
+    </button>
+    <button class="px-btn px-btn-ghost px-btn-full" id="btn-resume" style="display:none;margin-top:8px;font-size:7px;padding:11px;" onclick="resumeGame()">
+      Continue (Day <span id="resume-day">?</span>)
+    </button>
+    <p style="font-family:var(--font-px);font-size:5px;color:var(--dim);margin-top:14px;letter-spacing:0.1em;">NO ACCOUNT NEEDED &middot; AUTO-SAVES</p>
+  </div>
+</div>
+
+<!-- CHAR SELECT -->
+<div class="screen" id="s-charsel">
+  <div class="charsel-header">
+    <h2>Choose Survivor</h2>
+    <p>Your perspective. Your limits.</p>
+  </div>
+  <div class="char-grid" id="char-grid-select"></div>
+  <div style="max-width:560px;margin:0 auto;padding:0 10px;">
+    <button class="px-btn px-btn-green px-btn-full" onclick="confirmCharSelect()" style="padding:13px;font-size:9px;">
+      Play as <span id="selected-char-name">Maya</span> &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="s-game">
+  <div class="topbar">
+    <span class="topbar-brand">Stranded</span>
+    <span class="topbar-day" id="day-display">Day 1 / 30</span>
+    <div class="topbar-right">
+      <div class="morale-pill">
+        <div class="morale-bar"><div class="morale-fill" id="morale-bar" style="width:70%;background:var(--green)"></div></div>
+        <span id="morale-val">70</span>
+      </div>
+      <button class="save-btn" onclick="saveGame()">SAV</button>
+    </div>
+  </div>
+  <div class="rescue-strip">
+    <span class="rescue-label">Rescue</span>
+    <div class="rescue-track"><div class="rescue-fill" id="rescue-bar" style="width:5%"></div></div>
+    <span class="rescue-pct" id="rescue-pct">5%</span>
+  </div>
+  <div class="game-body">
+    <div class="game-inner">
+      <div class="resources-row" id="resources-row"></div>
+      <div class="game-tabs">
+        <button class="game-tab active" onclick="switchTab('tasks')" id="tab-tasks">Tasks</button>
+        <button class="game-tab" onclick="switchTab('craft')" id="tab-craft">Craft</button>
+        <button class="game-tab" onclick="switchTab('log')" id="tab-log">Log</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-tasks">
+        <div class="chars-row" id="chars-row"></div>
+        <div class="task-panel px-box" id="task-panel">
+          <div class="task-panel-header">
+            <div class="task-panel-label" id="task-label">Select a survivor</div>
+            <div class="task-panel-hint" id="task-hint">Click a character card above</div>
+          </div>
+          <div class="task-grid" id="task-grid" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-craft">
+        <div class="craft-panel px-box" id="craft-panel"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-log">
+        <div class="log-area px-box">
+          <div class="log-title">Activity Log</div>
+          <div id="log-entries"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn-hint" onclick="showHint()">? Hint</button>
+    <button class="btn-end" id="btn-end-day" onclick="endDay()">END DAY &rarr;</button>
+  </div>
+</div>
+
+<!-- DIALOGUE -->
+<div class="screen" id="s-dialogue">
+  <div class="dialogue-card px-box">
+    <div class="dialogue-portrait-wrap">
+      <img class="dialogue-portrait" id="dlg-portrait" src="" alt="">
+    </div>
+    <div class="dialogue-speaker">
+      <div class="dialogue-avatar" id="dlg-avatar">
+        <img id="dlg-avatar-img" src="" alt="">
+      </div>
+      <div>
+        <div class="dialogue-speaker-name" id="dlg-name"></div>
+        <div class="dialogue-speaker-role" id="dlg-role"></div>
+      </div>
+    </div>
+    <div class="dialogue-body">
+      <div class="dialogue-text" id="dlg-text"></div>
+      <div class="dialogue-subtext" id="dlg-subtext"></div>
+      <div class="dialogue-choices" id="dlg-choices"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DAY REPORT -->
+<div class="screen" id="s-dayreport">
+  <div class="dayreport-card">
+    <div class="dayreport-header px-box">
+      <div class="dayreport-day" id="dr-day-label">End of Day 1</div>
+      <div class="dayreport-title">Day Report</div>
+    </div>
+    <div class="dr-section-lbl">Resources</div>
+    <div class="dr-resources" id="dr-resources"></div>
+    <div class="dr-rescue-row px-box" style="margin-top:4px">
+      <span class="dr-rescue-lbl">Rescue</span>
+      <div class="dr-rescue-track"><div class="dr-rescue-fill" id="dr-rescue-fill" style="width:5%"></div></div>
+      <span class="dr-rescue-pct" id="dr-rescue-pct">5%</span>
+    </div>
+    <div class="dr-section-lbl">Survivors</div>
+    <div class="dr-chars" id="dr-chars"></div>
+    <div class="dr-section-lbl">Today's Events</div>
+    <div class="dr-events px-box" id="dr-events"></div>
+    <button class="dr-continue-btn" id="dr-continue-btn">Continue &#9654;</button>
+  </div>
+</div>
+
+<!-- CRISIS -->
+<div class="screen" id="s-crisis">
+  <div class="crisis-card px-box-red">
+    <div class="crisis-header">
+      <div class="crisis-type-badge" id="crisis-type"></div>
+      <h2 id="crisis-title"></h2>
+    </div>
+    <div class="crisis-body">
+      <div class="crisis-desc" id="crisis-desc"></div>
+      <div class="crisis-status" id="crisis-status"></div>
+      <div class="crisis-opts" id="crisis-opts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div class="screen" id="s-score">
+  <div class="score-card">
+    <div class="score-header">
+      <div class="score-lbl">Mission complete</div>
+      <div class="score-big" id="score-big">84</div>
+      <div class="score-grade" id="score-grade"></div>
+      <div class="score-sub" id="score-sub"></div>
+    </div>
+    <div class="score-dims-card px-box">
+      <div class="score-dims" id="score-dims"></div>
+    </div>
+    <div class="debrief-box px-box">
+      <div class="debrief-title">Business Debrief</div>
+      <div id="debrief-items"></div>
+    </div>
+    <div class="consequence-box px-box" id="consequence-box">
+      <div class="consequence-title">Decision Consequences</div>
+      <div id="consequence-items"></div>
+    </div>
+    <div class="score-btns">
+      <button class="btn-replay secondary" onclick="goIntro()">&lt; Menu</button>
+      <button class="btn-replay primary" onclick="restartGame()">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+//
+//  CHARACTERS
+//
+const CHARS = {
+  maya:{name:'Maya',role:'The Strategist',init:'MA',color:'var(--maya-c)',bg:'#0a2a1a',
+    stats:{planning:90,strength:15,crafting:40,morale_aura:65,resilience:50},
+    bio:'Former management consultant. Brilliant at seeing the big picture, terrible at lifting heavy things. Her plans are always right — on paper.',
+    best:['signal','explore','morale'],weak:['gather-wood','build'],
+    weakness:'Overplans under pressure — loses 2 turns on crisis if no contingency task assigned.'},
+  rex:{name:'Rex',role:'The Operator',init:'RX',color:'var(--rex-c)',bg:'#1f1208',
+    stats:{planning:30,strength:95,crafting:90,morale_aura:35,resilience:80},
+    bio:"Ex-military logistics sergeant. Builds anything out of anything. Doesn't strategise — executes. Tell him what to build and he'll build it twice as fast.",
+    best:['build','gather-wood','gather-food'],weak:['signal','morale'],
+    weakness:'Ignores morale — if unassigned for 2+ turns his own morale drops and he refuses complex tasks.'},
+  lena:{name:'Lena',role:'The Analyst',init:'LE',color:'var(--lena-c)',bg:'#08101e',
+    stats:{planning:75,strength:20,crafting:80,morale_aura:30,resilience:40},
+    bio:'Data scientist. Sees patterns in everything — weather, resource decay, injury risk. Her forecasts save the team from bad surprises, but she needs data to function.',
+    best:['explore','build','fetch-water'],weak:['gather-wood','gather-food'],
+    weakness:'Tank morale — the group feels worse when she\'s visibly anxious; team morale -5 each day she has no active forecast task.'},
+  sam:{name:'Sam',role:'The Negotiator',init:'SA',color:'var(--sam-c)',bg:'#1f100a',
+    stats:{planning:55,strength:45,crafting:35,morale_aura:95,resilience:55},
+    bio:'HR director turned reluctant survivalist. Terrible in a crisis alone — but when Sam is happy, everyone works harder. The glue that keeps the team from fracturing.',
+    best:['morale','signal','fetch-water'],weak:['build','gather-wood'],
+    weakness:"Needs validation — Sam's morale drops fast if not given a 'leadership' task every 3 turns; at critical low, triggers team conflict event."}
+};
+
+//
+//  TASKS
+//
+const TASKS = [
+  {id:'gather-food', label:'Gather food',  cost:'-3 energy', effect:s=>{s.food+=calcOutput(s,'gather-food');addLog(s,'Foraging for food.','');}},
+  {id:'gather-wood', label:'Gather wood',  cost:'-3 energy', effect:s=>{s.wood+=calcOutput(s,'gather-wood');addLog(s,'Gathering wood.','');}},
+  {id:'fetch-water', label:'Fetch water',  cost:'-2 energy', effect:s=>{s.water+=calcOutput(s,'fetch-water');addLog(s,'Fetching water.','');}},
+  {id:'build',       label:'Build / craft',cost:'-4 energy', effect:s=>{const prog=calcOutput(s,'build');s.buildProgress=(s.buildProgress||0)+prog;addLog(s,`Construction progress +${prog}.`,'');}},
+  {id:'morale',      label:'Boost morale', cost:'-1 energy', effect:s=>{s.morale=Math.min(100,s.morale+8);addLog(s,'Lifting team spirits.','good');}},
+  {id:'rest',        label:'Rest',         cost:'+4 energy', effect:s=>{addLog(s,'Resting and recovering.','');}},
+  {id:'signal',      label:'Signal watch', cost:'-2 energy', effect:s=>{s.rescueChance=Math.min(95,s.rescueChance+6);addLog(s,'Watching for ships / aircraft.','good');}},
+  {id:'explore',     label:'Explore',      cost:'-3 energy', effect:s=>{if(Math.random()<0.3){s.steel+=2;addLog(s,'Found steel materials!','good');}else addLog(s,'Explored the island.','');}}
+];
+
+//
+//  CRAFTING ITEMS
+//
+const CRAFT_ITEMS = [
+  {id:'shelter',    name:'Shelter frame',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="1" y="8" width="14" height="7" fill="#885820"/>
+     <rect x="0" y="7" width="16" height="2" fill="#5a3a10"/>
+     <polygon points="8,1 1,8 15,8" fill="#d8a000"/>
+     <polygon points="8,1 1,8 3,8" fill="#f8d800"/>
+     <rect x="6" y="10" width="4" height="5" fill="#4a2a08"/>
+   </svg>`,
+   tier:1, cost:{wood:8,fibre:4}, turns:8, stateKey:'shelterBuilt',
+   effect:s=>{s.shelterBuilt=true;s.rescueChance=Math.min(95,s.rescueChance+5);addLog(s,'Shelter frame complete! Weather protection active.','good');logDecision(`Day ${s.day}: Shelter Frame completed`,`Crisis damage halved. Crisis probability reduced from 28% to 22%. +5% rescue chance.`,'good');triggerDialogue('shelter_built');},
+   desc:'8 wood + 4 fibre -> weather protection, morale boost'},
+  {id:'filter',     name:'Water filter',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="4" y="1" width="8" height="2" fill="#7b92c8"/>
+     <rect x="5" y="3" width="6" height="1" fill="#5a6fa8"/>
+     <rect x="6" y="4" width="4" height="6" fill="#3d4166"/>
+     <rect x="7" y="10" width="2" height="2" fill="#5a6fa8"/>
+     <rect x="6" y="12" width="4" height="1" fill="#28c8a0"/>
+     <rect x="3" y="4" width="2" height="1" fill="#a8c8f8"/>
+     <rect x="11" y="4" width="2" height="1" fill="#a8c8f8"/>
+   </svg>`,
+   tier:1, cost:{wood:2,steel:2}, turns:3, stateKey:'waterFilter',
+   effect:s=>{s.waterFilter=true;addLog(s,'Water filter built! No more illness risk.','good');},
+   desc:'2 wood + 2 steel -> prevents waterborne illness'},
+  {id:'spear',      name:'Fishing spear',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="7" y="2" width="2" height="10" fill="#885820"/>
+     <polygon points="8,0 6,4 10,4" fill="#a8c8f8"/>
+     <polygon points="8,0 6,4 8,3" fill="#f0f0f0"/>
+     <rect x="6" y="12" width="4" height="2" fill="#5a3a10"/>
+     <rect x="5" y="13" width="6" height="1" fill="#3a2008"/>
+   </svg>`,
+   tier:1, cost:{wood:2,steel:1}, turns:2, stateKey:'spearBuilt',
+   effect:s=>{s.spearBuilt=true;addLog(s,'Fishing spear crafted! Food gathering improved.','good');},
+   desc:'2 wood + 1 steel -> +3 food per gather turn'},
+  {id:'signal',     name:'Signal fire',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="3" y="11" width="10" height="3" fill="#885820"/>
+     <rect x="4" y="10" width="8" height="2" fill="#5a3a10"/>
+     <rect x="6" y="7" width="4" height="4" fill="#f87800"/>
+     <rect x="5" y="6" width="6" height="2" fill="#f8d800"/>
+     <rect x="7" y="4" width="2" height="3" fill="#f8d800"/>
+     <rect x="6" y="3" width="4" height="2" fill="#ff6060"/>
+     <rect x="7" y="2" width="2" height="2" fill="#f0f0f0"/>
+   </svg>`,
+   tier:2, cost:{wood:6,steel:1}, turns:4, stateKey:'signalFireBuilt',
+   effect:s=>{s.signalFireBuilt=true;s.rescueChance=Math.min(95,s.rescueChance+20);addLog(s,'Signal fire lit! Rescue chance surged.','good');logDecision(`Day ${s.day}: Signal Fire completed`,`+20% rescue chance. Ship and aircraft crises now have high-value signal options.`,'good');triggerDialogue('signal_fire');},
+   desc:'6 wood + 1 steel -> +20% rescue chance per day'},
+  {id:'medkit',     name:'Medical kit',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="2" y="4" width="12" height="10" fill="#e83030"/>
+     <rect x="1" y="5" width="14" height="8" fill="#c02020"/>
+     <rect x="2" y="4" width="12" height="1" fill="#ff6060"/>
+     <rect x="7" y="6" width="2" height="6" fill="#f0f0f0"/>
+     <rect x="5" y="8" width="6" height="2" fill="#f0f0f0"/>
+     <rect x="5" y="2" width="6" height="3" fill="#885820"/>
+     <rect x="6" y="1" width="4" height="2" fill="#5a3a10"/>
+   </svg>`,
+   tier:2, cost:{fibre:4,steel:2}, turns:3, stateKey:'medkitBuilt',
+   effect:s=>{s.medkitBuilt=true;addLog(s,'Medical kit assembled! Can treat injuries faster.','good');logDecision(`Day ${s.day}: Medical Kit completed`,`Injury recovery doubled. Rex injury crisis recovers in 1 day instead of 4.`,'good');},
+   desc:'4 fibre + 2 steel -> heals injuries in 1 turn'},
+  {id:'rain',       name:'Rain collector',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="2" y="8" width="12" height="6" fill="#3d4166"/>
+     <rect x="3" y="9" width="10" height="4" fill="#28c8a0"/>
+     <rect x="1" y="7" width="14" height="2" fill="#5a6fa8"/>
+     <rect x="2" y="5" width="12" height="2" fill="#7b92c8"/>
+     <rect x="4" y="3" width="8" height="2" fill="#a8c8f8"/>
+     <rect x="5" y="1" width="6" height="2" fill="#a8c8f8"/>
+     <rect x="4" y="14" width="2" height="2" fill="#885820"/>
+     <rect x="10" y="14" width="2" height="2" fill="#885820"/>
+   </svg>`,
+   tier:2, cost:{wood:3,fibre:4}, turns:3, stateKey:'rainBuilt',
+   effect:s=>{s.rainBuilt=true;addLog(s,'Rain collector built! Passive +4L water per day.','good');},
+   desc:'3 wood + 4 fibre -> passive +4L water per day'},
+  {id:'antenna',    name:'Radio antenna',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="7" y="4" width="2" height="10" fill="#885820"/>
+     <rect x="7" y="2" width="2" height="3" fill="#a8c8f8"/>
+     <rect x="4" y="5" width="8" height="1" fill="#7b92c8"/>
+     <rect x="3" y="7" width="10" height="1" fill="#5a6fa8"/>
+     <rect x="5" y="6" width="1" height="2" fill="#7b92c8"/>
+     <rect x="10" y="6" width="1" height="2" fill="#7b92c8"/>
+     <rect x="4" y="14" width="8" height="2" fill="#5a3a10"/>
+     <rect x="6" y="13" width="4" height="2" fill="#3d4166"/>
+     <rect x="7" y="1" width="2" height="2" fill="#f8d800"/>
+   </svg>`,
+   tier:3, cost:{steel:6,wood:2}, turns:6, stateKey:'antennaBuilt',
+   effect:s=>{s.antennaBuilt=true;s.rescueChance=Math.min(95,s.rescueChance+40);addLog(s,'Radio antenna complete! Massive rescue boost.','good');logDecision(`Day ${s.day}: Radio Antenna completed`,`+40% rescue chance. Aircraft crisis now offers +50% rescue option. Near-certain extraction.`,'good');triggerDialogue('antenna_built');},
+   desc:'6 steel + 2 wood -> +40% rescue chance per day'},
+  {id:'tower',      name:'Lookout tower',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="6" y="1" width="4" height="3" fill="#5a6fa8"/>
+     <rect x="5" y="4" width="6" height="1" fill="#3d4166"/>
+     <rect x="6" y="2" width="4" height="1" fill="#a8c8f8"/>
+     <rect x="7" y="5" width="2" height="8" fill="#885820"/>
+     <rect x="5" y="5" width="2" height="6" fill="#5a3a10"/>
+     <rect x="9" y="5" width="2" height="6" fill="#5a3a10"/>
+     <rect x="4" y="11" width="8" height="2" fill="#885820"/>
+     <rect x="3" y="13" width="10" height="2" fill="#5a3a10"/>
+     <rect x="6" y="7" width="4" height="1" fill="#3d4166"/>
+     <rect x="6" y="9" width="4" height="1" fill="#3d4166"/>
+   </svg>`,
+   tier:2, cost:{wood:10,steel:2}, turns:5, stateKey:'towerBuilt',
+   effect:s=>{s.towerBuilt=true;s.rescueChance=Math.min(95,s.rescueChance+15);addLog(s,'Lookout tower complete! Lena can now spot ships earlier.','good');triggerDialogue('rescue_eve');},
+   desc:'10 wood + 2 steel -> +15% rescue chance, Lena explore bonus'},
+  {id:'herbs',      name:'Herb garden',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="2" y="12" width="12" height="3" fill="#885820"/>
+     <rect x="3" y="11" width="10" height="2" fill="#5a3a10"/>
+     <rect x="4" y="8" width="2" height="4" fill="#38b038"/>
+     <rect x="3" y="6" width="4" height="3" fill="#68d868"/>
+     <rect x="2" y="5" width="3" height="2" fill="#a8f0a8"/>
+     <rect x="7" y="7" width="2" height="5" fill="#38b038"/>
+     <rect x="6" y="5" width="4" height="3" fill="#68d868"/>
+     <rect x="10" y="8" width="2" height="4" fill="#38b038"/>
+     <rect x="9" y="6" width="4" height="3" fill="#68d868"/>
+     <rect x="11" y="5" width="3" height="2" fill="#a8f0a8"/>
+   </svg>`,
+   tier:1, cost:{wood:1,steel:1}, turns:2, stateKey:'herbsBuilt',
+   effect:s=>{s.herbsBuilt=true;addLog(s,'Herb garden planted! Passive injury recovery each day.','good');},
+   desc:'1 wood + 1 steel -> passive -1 injury/illness per day'},
+  {id:'raft',       name:'Rescue raft',
+   icon:`<svg width="32" height="32" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+     <rect x="1" y="10" width="14" height="4" fill="#885820"/>
+     <rect x="2" y="9" width="12" height="2" fill="#5a3a10"/>
+     <rect x="0" y="11" width="16" height="1" fill="#3a2008"/>
+     <rect x="3" y="7" width="2" height="4" fill="#885820"/>
+     <rect x="11" y="7" width="2" height="4" fill="#885820"/>
+     <rect x="7" y="3" width="2" height="7" fill="#885820"/>
+     <polygon points="9,3 9,9 14,6" fill="#f0f0f0"/>
+     <polygon points="9,3 9,9 14,6" fill="none" stroke="#5a6fa8" stroke-width="0.5"/>
+     <rect x="2" y="13" width="12" height="1" fill="#28c8a0" opacity="0.5"/>
+   </svg>`,
+   tier:3, cost:{wood:14,steel:4,fibre:6}, turns:10, stateKey:'raftBuilt',
+   effect:s=>{s.raftBuilt=true;s.rescueChance=Math.min(95,s.rescueChance+30);addLog(s,'Rescue raft complete! You can now attempt to reach shipping lanes.','good');triggerDialogue('rescue_eve');},
+   desc:'14 wood + 4 steel + 6 fibre -> +30% rescue, enables open-sea escape'},
+];
+
+// Fibre as resource: treated as wood/3 for simplicity in this prototype
+function hasCraftResources(s, item) {
+  const c = item.cost;
+  return (!c.wood || s.wood >= c.wood) &&
+         (!c.steel || s.steel >= c.steel) &&
+         (!c.fibre || s.wood >= Math.ceil((c.fibre||0)/2)); // fibre = rough wood conversion
+}
+function spendCraftResources(s, item) {
+  const c = item.cost;
+  if(c.wood) s.wood -= c.wood;
+  if(c.steel) s.steel -= c.steel;
+  if(c.fibre) s.wood -= Math.ceil(c.fibre/2);
+}
+
+//
+//  CRISIS DECK -- 12 CARDS
+//
+const CRISIS_DECK = [
+  {type:'Environmental',title:'Tropical storm',
+   desc:'A storm is moving in. Outdoor tasks cancelled for 2 days. Without shelter, food spoils (-6) and morale drops (-12).',
+   status:s=>s.shelterBuilt?'+ Shelter built -- damage halved.':'! No shelter -- full damage.',
+   opts:[
+     {label:'Shelter in place',good:s=>s.shelterBuilt,text:'Ride it out. Halved damage if shelter built.',
+      fn:s=>{s.food-=s.shelterBuilt?3:6;s.morale-=s.shelterBuilt?4:12;addLog(s,s.shelterBuilt?'Storm weathered -- shelter held.':'Storm battered camp.',s.shelterBuilt?'good':'bad');}},
+     {label:'Reinforce now',good:()=>false,text:'Spend 4 wood. Reduce food loss to just 1.',
+      fn:s=>{if(s.wood>=4){s.wood-=4;s.food-=1;addLog(s,'Reinforced in time.','good');}else{s.food-=6;addLog(s,'Not enough wood to reinforce!','bad');}}},
+     {label:'Brave the storm',good:()=>false,text:'+30% injury risk per character.',
+      fn:s=>{Object.keys(CHARS).forEach(c=>{if(Math.random()<0.3){s.injuries[c]=2;addLog(s,`${CHARS[c].name} injured in storm.`,'bad');}});}}
+   ]},
+  {type:'Medical',title:'Waterborne illness',
+   desc:'Impure water has spread illness. Energy halved for 3 days. A water filter prevents this entirely.',
+   status:s=>s.waterFilter?'+ Filter active -- only 1 affected.':'! No filter -- spreading.',
+   opts:[
+     {label:'Rest and recover',good:()=>true,text:'One character out for 3 days.',
+      fn:s=>{const c=Object.keys(CHARS)[Math.floor(Math.random()*4)];s.illnesses[c]=s.waterFilter?1:3;s.morale-=6;addLog(s,`${CHARS[c].name} is ill.`,'bad');}},
+     {label:'Push through',good:()=>false,text:'Risk spreading to second character.',
+      fn:s=>{s.morale-=10;addLog(s,'Illness spreading.','bad');}}
+   ]},
+  {type:'Team dynamics',title:'Conflict erupts',
+   desc:'Two survivors refuse to work together. Sam can resolve this if assigned to morale duty.',
+   status:s=>s.assignments&&s.assignments.sam==='morale'?'+ Sam on morale -- quick resolution.':'! Sam not on morale duty.',
+   opts:[
+     {label:'Sam mediates',good:s=>s.assignments&&s.assignments.sam==='morale',text:'Resolved in 1 turn, no penalty.',
+      fn:s=>{addLog(s,'Sam resolved the conflict quickly.','good');}},
+     {label:'Let it blow over',good:()=>false,text:'4-day morale penalty for the team.',
+      fn:s=>{s.morale-=15;addLog(s,'Conflict dragged on -- team fractured.','bad');}}
+   ]},
+  {type:'Opportunity',title:'Passing ship spotted!',
+   desc:'A vessel on the horizon. One turn to signal. Is your signal fire ready?',
+   status:s=>s.signalFireBuilt?'+ Signal fire lit -- great position!':'! No signal fire built.',
+   opts:[
+     {label:'Signal with fire',good:s=>s.signalFireBuilt,text:'+30% rescue chance immediately.',
+      fn:s=>{if(s.signalFireBuilt){s.rescueChance=Math.min(95,s.rescueChance+30);addLog(s,'Ship signalled! Rescue chance surged.','good');}else addLog(s,'Ship passed -- no way to signal.','bad');}},
+     {label:'Wave and shout',good:()=>false,text:'Tiny chance, +5% rescue.',
+      fn:s=>{s.rescueChance=Math.min(95,s.rescueChance+5);addLog(s,'Waved desperately -- maybe they saw...','');}}
+   ]},
+  {type:'Environmental',title:'Wild animal attack',
+   desc:'A wild boar charges the camp. Someone gets injured unless they can defend the camp.',
+   status:s=>s.spearBuilt?'+ Spear available -- defend the camp.':'! No weapon to defend.',
+   opts:[
+     {label:'Fight it off (spear)',good:s=>s.spearBuilt,text:'Drive the animal away. No injuries.',
+      fn:s=>{if(s.spearBuilt){addLog(s,'Drove the animal away with the spear.','good');}else{const c=Object.keys(CHARS)[Math.floor(Math.random()*4)];s.injuries[c]=2;addLog(s,`${CHARS[c].name} was injured in the attack.`,'bad');}}},
+     {label:'Retreat into shelter',good:s=>s.shelterBuilt,text:'Safe but camp supplies damaged (-3 food).',
+      fn:s=>{s.food-=3;addLog(s,'Retreated to shelter -- food stocks raided.','warn');}}
+   ]},
+  {type:'Medical',title:'Heat exhaustion',
+   desc:'Temperatures are extreme. Working at full pace is dangerous. Rest or risk multiple injuries.',
+   status:s=>s.water>12?'+ Good water supply -- hydration helps.':'! Low water -- risk is higher.',
+   opts:[
+     {label:'Scale back tasks',good:()=>true,text:'All output -30% today. No injuries.',
+      fn:s=>{s.food=Math.max(0,s.food-2);addLog(s,'Scaled back in the heat -- no injuries.','');}},
+     {label:'Push full pace',good:()=>false,text:'Normal output but injury risk for all.',
+      fn:s=>{Object.keys(CHARS).forEach(c=>{if(Math.random()<0.25){s.injuries[c]=(s.injuries[c]||0)+1;addLog(s,`${CHARS[c].name} suffered heat exhaustion.`,'bad');}});}}
+   ]},
+  {type:'Opportunity',title:'Supply cache found',
+   desc:'Lena discovers wreckage from the plane. Extra supplies -- but only if she was sent exploring recently.',
+   status:s=>s.lenaExplored?'+ Lena explored -- she found the cache!':'! Lena never explored -- cache missed.',
+   opts:[
+     {label:'Collect the supplies',good:s=>s.lenaExplored,text:'+10 steel, +6 food.',
+      fn:s=>{if(s.lenaExplored){s.steel+=10;s.food+=6;addLog(s,'Supply cache found! Major haul.','good');}else addLog(s,'No one explored that area -- cache missed.','warn');}},
+     {label:'Too risky to go back',good:()=>false,text:'Skip it. Miss the opportunity.',
+      fn:s=>{addLog(s,'Decided not to risk it.','');}}
+   ]},
+  {type:'Team dynamics',title:'Mutiny risk',
+   desc:'Morale has been dangerously low. Someone is close to refusing orders entirely.',
+   status:s=>s.morale>40?'+ Morale stable enough.':'! Critical morale -- mutiny imminent.',
+   opts:[
+     {label:'Emergency morale session',good:()=>true,text:'All tasks cancelled today. +20 morale.',
+      fn:s=>{s.morale=Math.min(100,s.morale+20);addLog(s,'Emergency team session -- morale recovered.','good');}},
+     {label:'Ignore it, push on',good:()=>false,text:'Risk losing control of one character.',
+      fn:s=>{if(s.morale<35){const c=Object.keys(CHARS)[Math.floor(Math.random()*4)];s.injuries[c]=3;s.morale-=10;addLog(s,`${CHARS[c].name} refused orders. Chaos for 3 days.`,'bad');}}}
+   ]},
+  {type:'Environmental',title:'Signal fire destroyed',
+   desc:'A night storm wiped out the signal fire. The rescue chance boost is lost.',
+   status:s=>s.signalFireBuilt?'The fire you built has been destroyed.':'No fire was built -- no change.',
+   opts:[
+     {label:'Rebuild immediately',good:()=>true,text:'Assign Rex to rebuild -- costs 6 wood.',
+      fn:s=>{if(s.wood>=6&&s.signalFireBuilt){s.wood-=6;s.rescueChance=Math.max(5,s.rescueChance-10);addLog(s,'Signal fire destroyed -- rebuilding started.','warn');}s.signalFireBuilt=false;}},
+     {label:'Leave it for now',good:()=>false,text:'Rescue chance drops by 20%.',
+      fn:s=>{s.signalFireBuilt=false;s.rescueChance=Math.max(5,s.rescueChance-20);addLog(s,'Signal fire lost -- rescue chance dropped.','bad');}}
+   ]},
+  {type:'Medical',title:'Rex is injured',
+   desc:'Rex slipped during construction. He\'s hurt. Your best builder is out unless you have a medical kit.',
+   status:s=>s.medkitBuilt?'+ Medical kit available -- quick recovery.':'! No medical kit -- 4 days recovery.',
+   opts:[
+     {label:'Treat with medical kit',good:s=>s.medkitBuilt,text:'Rex recovers in 1 day.',
+      fn:s=>{s.injuries.rex=s.medkitBuilt?1:4;addLog(s,s.medkitBuilt?'Rex treated -- back tomorrow.':'Rex injured -- out for 4 days.',s.medkitBuilt?'warn':'bad');}},
+     {label:'Rest and recover',good:()=>false,text:'Rex out for 4 days. Building stalls.',
+      fn:s=>{s.injuries.rex=4;addLog(s,'Rex out for 4 days. Building progress stalls.','bad');}}
+   ]},
+  {type:'Opportunity',title:'Rescue aircraft overhead',
+   desc:'A search aircraft is making passes. If you have both signal fire and antenna active, this is your moment.',
+   status:s=>(s.signalFireBuilt&&s.antennaBuilt)?'+ Full signal -- excellent chance!':s.signalFireBuilt?'~ Signal fire only -- partial signal.':'! No signal infrastructure at all.',
+   opts:[
+     {label:'Full signal (fire + antenna)',good:s=>s.signalFireBuilt&&s.antennaBuilt,text:'Near-certain rescue. +50% rescue chance.',
+      fn:s=>{if(s.signalFireBuilt&&s.antennaBuilt){s.rescueChance=Math.min(95,s.rescueChance+50);addLog(s,'Full signal! Aircraft saw you -- rescue imminent.','good');}else if(s.signalFireBuilt){s.rescueChance=Math.min(95,s.rescueChance+25);addLog(s,'Fire signal spotted -- good chance.','good');}else addLog(s,'No signal -- aircraft flew on.','bad');}},
+     {label:'Fire signal only',good:s=>s.signalFireBuilt,text:'+25% rescue chance.',
+      fn:s=>{if(s.signalFireBuilt){s.rescueChance=Math.min(95,s.rescueChance+25);addLog(s,'Fire signal seen!','good');}else addLog(s,'Nothing to signal with.','bad');}}
+   ]},
+  {type:'Team dynamics',title:'Food rationing dispute',
+   desc:'The team is arguing over food distribution. Sam can mediate, but someone feels unfairly treated.',
+   status:s=>s.food>15?'+ Enough food -- tension manageable.':'! Scarce food makes this volatile.',
+   opts:[
+     {label:'Equal rations for all',good:()=>true,text:'Fair, morale stable. Slightly less efficient.',
+      fn:s=>{addLog(s,'Equal rations agreed -- fair but not optimal.','');s.morale=Math.min(100,s.morale+3);}},
+     {label:'Ration by task output',good:()=>false,text:'Efficient, but Rex and Sam may resent it.',
+      fn:s=>{s.food+=2;s.morale_chars.rex=Math.max(0,s.morale_chars.rex-10);s.morale_chars.sam=Math.max(0,s.morale_chars.sam-8);addLog(s,'Merit-based rationing -- efficient but unpopular.','warn');}}
+   ]}
+];
+
+//
+//  DIALOGUE EVENTS
+//
+const DIALOGUES = {
+  day1: {
+    char:'maya', text:'"Everyone listen up. We\'re alive, which means we can get rescued. But only if we make smart decisions from day one. Rex -- you\'re on construction. Lena -- I need you forecasting. Sam -- keep everyone together. Let\'s go."',
+    subtext:'Maya takes charge on Day 1. This sets the tone for how the team operates. Your first task assignments matter.',
+    choices:[{label:'Begin Day 1 ->', fn:()=>resumeFromDialogue()}]
+  },
+  shelter_built: {
+    char:'rex', text:'"Not pretty, but it\'ll hold. Storm hits us now, we stay dry. Next we need fire -- a big one. Something any ship in fifty miles can see."',
+    subtext:'Rex is satisfied. The shelter is Tier 1 done. Sam\'s morale has ticked up. The team feels more secure.',
+    choices:[{label:'Continue ->', fn:()=>resumeFromDialogue()}]
+  },
+  signal_fire: {
+    char:'sam', text:'"I actually started crying when it lit. Isn\'t that embarrassing? But honestly -- seeing that fire burn means we haven\'t given up. The team needed this."',
+    subtext:'Sam\'s morale jumps significantly. The signal fire gives the whole team a sense of forward momentum -- a visible sign of progress.',
+    choices:[{label:'Continue ->', fn:()=>resumeFromDialogue()}]
+  },
+  antenna_built: {
+    char:'lena', text:'"Calculated. Based on traffic patterns, atmospheric conditions, and our current signal strength, we have an 83% probability of detection within 4 days. I\'d call that good odds."',
+    subtext:'Lena\'s analysis is almost certainly right. The antenna is Tier 3 -- building it took discipline and resource management. The end is close.',
+    choices:[{label:'Continue ->', fn:()=>resumeFromDialogue()}]
+  },
+  low_morale: {
+    char:'sam', text:'"Can I be honest? I\'m worried about Rex. He hasn\'t eaten properly in days and he\'s doing everything alone. We need to check in as people, not just as workers."',
+    subtext:'Sam flags a human problem before it becomes a business problem. This is what HR does. Ignore it and morale will collapse.',
+    choices:[
+      {label:'Assign Sam to morale duty', fn:()=>{ASSIGNMENTS.sam='morale';resumeFromDialogue();},
+       log:{decision:'Low morale warning → Assigned Sam to morale duty',consequence:'Team morale stabilised. Sam\'s aura prevents further collapse.',type:'good'}},
+      {label:'Keep current assignments', fn:()=>resumeFromDialogue(),
+       log:{decision:'Low morale warning → Kept current assignments',consequence:'Morale risk unaddressed. Further decay likely in coming days.',type:'bad'}}
+    ]
+  },
+  day5: {
+    char:'lena', text:'"I\'ve been tracking our consumption rates. At current pace we run out of food by day 18 unless we increase foraging output by at least 30%. Rex needs to be on food duty more often. The numbers don\'t lie."',
+    subtext:'Day 5 check-in. Lena\'s forecasting ability pays off early -- she\'s spotted a resource problem before it becomes a crisis. This is what analysts do: see the future in data.',
+    choices:[
+      {label:'Adjust strategy now ->', fn:()=>resumeFromDialogue(),
+       log:{decision:'Day 5 forecast → Adjusted resource strategy',consequence:'Proactive reallocation. Food crisis likely avoided.',type:'good'}},
+      {label:'Trust current plan ->', fn:()=>resumeFromDialogue(),
+       log:{decision:'Day 5 forecast → Ignored Lena\'s warning',consequence:'Risk of food shortfall by Day 18 unaddressed.',type:'warn'}}
+    ]
+  },
+  day10: {
+    char:'maya', text:'"Ten days. We\'re still here. That\'s not luck -- that\'s execution. But I want to be clear: being alive isn\'t the goal. Getting rescued is. Everything we do has to point toward that signal reaching someone."',
+    subtext:'Maya refocuses the team at the halfway point. In business terms: she\'s reminding the team what the actual KPI is. Survival is the constraint, not the objective.',
+    choices:[{label:'Keep going ->', fn:()=>resumeFromDialogue()}]
+  },
+  maya_rex_conflict: {
+    char:'rex', text:'"Maya keeps changing the plan. First it\'s build shelter, then signal fire, now she wants the antenna done before we have enough food. I need ONE clear priority or I\'m going to waste days setting up for tasks that get cancelled."',
+    subtext:'Rex is flagging an operations problem: unclear priorities = wasted effort. Maya\'s strategic agility is Rex\'s operational chaos. This tension is real in every organisation.',
+    choices:[
+      {label:'Set clear priorities with Maya', fn:()=>{STATE.morale=Math.min(100,STATE.morale+8);addLog(STATE,'Maya and Rex aligned on priorities.','good');resumeFromDialogue();},
+       log:{decision:'Maya-Rex conflict → Set clear priorities',consequence:'+8 morale. Rex aligned and operating at full output.',type:'good'}},
+      {label:'Let them work it out', fn:()=>{STATE.morale=Math.max(0,STATE.morale-6);addLog(STATE,'Tension between Maya and Rex continues.','warn');resumeFromDialogue();},
+       log:{decision:'Maya-Rex conflict → Let tension continue',consequence:'-6 morale. Operational friction persists between strategy and execution.',type:'bad'}}
+    ]
+  },
+  food_crisis: {
+    char:'sam', text:'"People are getting quiet at meals. That\'s a bad sign. When people stop complaining, they\'ve stopped hoping. We need a win -- something visible. Even just better food. Can Rex go fishing today?"',
+    subtext:'Sam reads the room before anyone else does. Visible short-term wins matter for morale even when the long game is more important. Never underestimate the symbolic power of a good meal.',
+    choices:[
+      {label:'Assign Rex to gather food', fn:()=>{ASSIGNMENTS.rex='gather-food';resumeFromDialogue();},
+       log:{decision:'Food crisis warning → Reassigned Rex to foraging',consequence:'Short-term morale win. Food pressure eased.',type:'good'}},
+      {label:'Stick to the build plan', fn:()=>resumeFromDialogue(),
+       log:{decision:'Food crisis warning → Stayed on build plan',consequence:'Build progress protected but team morale at risk from visible food shortage.',type:'warn'}}
+    ]
+  },
+  rescue_eve: {
+    char:'lena', text:'"Rescue probability is now above 70%. I want everyone to understand what that means: statistically, we are more likely to be rescued than not. We made that happen through decisions. Not luck. Decisions."',
+    subtext:'Lena puts it in perspective. The rescue chance didn\'t go up by accident -- it went up because the team built the right things at the right time. That\'s the whole lesson.',
+    choices:[{label:'Final push ->', fn:()=>resumeFromDialogue()}]
+  }
+};
+
+// Embedded pixel-art SVG portraits — base64 encoded for universal browser support
+function makeSVGPortrait(svgContent) {
+  try {
+    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgContent)));
+  } catch(e) {
+    return '';
+  }
+}
+
+const PORTRAITS = {
+  // MAYA — Strategist, teal/green theme, sharp eyes, tied hair
+  maya: makeSVGPortrait(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="96" height="96" shape-rendering="crispEdges">
+    <rect width="32" height="32" fill="#0a2a1a"/>
+    <rect x="9" y="3" width="14" height="3" fill="#1a0a00"/>
+    <rect x="7" y="4" width="18" height="4" fill="#1a0a00"/>
+    <rect x="20" y="2" width="5" height="5" fill="#1a0a00"/>
+    <rect x="22" y="1" width="3" height="3" fill="#2a1800"/>
+    <rect x="9" y="7" width="14" height="14" fill="#d4956a"/>
+    <rect x="8" y="9" width="2" height="10" fill="#c07850"/>
+    <rect x="22" y="9" width="2" height="10" fill="#c07850"/>
+    <rect x="7" y="11" width="2" height="4" fill="#c07850"/>
+    <rect x="23" y="11" width="2" height="4" fill="#c07850"/>
+    <rect x="11" y="10" width="4" height="1" fill="#1a0a00"/>
+    <rect x="17" y="10" width="4" height="1" fill="#1a0a00"/>
+    <rect x="11" y="12" width="4" height="3" fill="#0a1a0a"/>
+    <rect x="17" y="12" width="4" height="3" fill="#0a1a0a"/>
+    <rect x="12" y="13" width="2" height="2" fill="#38d888"/>
+    <rect x="18" y="13" width="2" height="2" fill="#38d888"/>
+    <rect x="12" y="13" width="1" height="1" fill="#a8f0c8"/>
+    <rect x="18" y="13" width="1" height="1" fill="#a8f0c8"/>
+    <rect x="15" y="16" width="2" height="2" fill="#b06840"/>
+    <rect x="12" y="19" width="8" height="1" fill="#8a3020"/>
+    <rect x="13" y="20" width="6" height="1" fill="#c05040"/>
+    <rect x="18" y="19" width="2" height="1" fill="#c05040"/>
+    <rect x="10" y="21" width="12" height="2" fill="#d4956a"/>
+    <rect x="12" y="23" width="8" height="1" fill="#c07850"/>
+    <rect x="13" y="24" width="6" height="3" fill="#c07850"/>
+    <rect x="7" y="27" width="18" height="5" fill="#1a3a28"/>
+    <rect x="10" y="26" width="4" height="4" fill="#28c8a0"/>
+    <rect x="18" y="26" width="4" height="4" fill="#28c8a0"/>
+    <rect x="14" y="25" width="4" height="2" fill="#0a1a10"/>
+    <rect x="7" y="8" width="2" height="13" fill="#1a0a00"/>
+    <rect x="23" y="8" width="2" height="13" fill="#1a0a00"/>
+  </svg>`),
+
+  // REX — Operator, amber/orange theme, stubble, strong jaw
+  rex: makeSVGPortrait(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="96" height="96" shape-rendering="crispEdges">
+    <rect width="32" height="32" fill="#1f1208"/>
+    <rect x="8" y="3" width="16" height="5" fill="#2a1800"/>
+    <rect x="6" y="5" width="20" height="4" fill="#2a1800"/>
+    <rect x="8" y="7" width="16" height="16" fill="#c87840"/>
+    <rect x="6" y="9" width="3" height="12" fill="#b06830"/>
+    <rect x="23" y="9" width="3" height="12" fill="#b06830"/>
+    <rect x="5" y="11" width="3" height="5" fill="#b06830"/>
+    <rect x="24" y="11" width="3" height="5" fill="#b06830"/>
+    <rect x="10" y="10" width="5" height="2" fill="#1a1000"/>
+    <rect x="17" y="10" width="5" height="2" fill="#1a1000"/>
+    <rect x="10" y="13" width="5" height="3" fill="#0a0800"/>
+    <rect x="17" y="13" width="5" height="3" fill="#0a0800"/>
+    <rect x="11" y="13" width="3" height="2" fill="#f8a800"/>
+    <rect x="18" y="13" width="3" height="2" fill="#f8a800"/>
+    <rect x="11" y="13" width="1" height="1" fill="#ffd060"/>
+    <rect x="18" y="13" width="1" height="1" fill="#ffd060"/>
+    <rect x="14" y="16" width="4" height="3" fill="#a05820"/>
+    <rect x="13" y="18" width="6" height="1" fill="#a05820"/>
+    <rect x="9" y="21" width="14" height="3" fill="#8a4818"/>
+    <rect x="10" y="20" width="12" height="1" fill="#a05828"/>
+    <rect x="11" y="20" width="10" height="1" fill="#602010"/>
+    <rect x="12" y="21" width="8" height="1" fill="#904030"/>
+    <rect x="8" y="22" width="16" height="3" fill="#b06830"/>
+    <rect x="9" y="25" width="14" height="1" fill="#906020"/>
+    <rect x="12" y="25" width="8" height="3" fill="#a05828"/>
+    <rect x="5" y="28" width="22" height="5" fill="#3a3a18"/>
+    <rect x="9" y="27" width="5" height="4" fill="#f8a800"/>
+    <rect x="18" y="27" width="5" height="4" fill="#f8a800"/>
+    <rect x="14" y="26" width="4" height="3" fill="#2a2a10"/>
+    <rect x="22" y="15" width="1" height="3" fill="#8a3010"/>
+  </svg>`),
+
+  // LENA — Analyst, blue theme, glasses, neat hair
+  lena: makeSVGPortrait(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="96" height="96" shape-rendering="crispEdges">
+    <rect width="32" height="32" fill="#08101e"/>
+    <rect x="8" y="2" width="16" height="6" fill="#0a0a28"/>
+    <rect x="6" y="4" width="20" height="5" fill="#0a0a28"/>
+    <rect x="6" y="8" width="3" height="14" fill="#0a0a28"/>
+    <rect x="23" y="8" width="3" height="14" fill="#0a0a28"/>
+    <rect x="9" y="8" width="14" height="14" fill="#e0b090"/>
+    <rect x="8" y="10" width="2" height="10" fill="#cc9878"/>
+    <rect x="22" y="10" width="2" height="10" fill="#cc9878"/>
+    <rect x="7" y="12" width="2" height="4" fill="#cc9878"/>
+    <rect x="23" y="12" width="2" height="4" fill="#cc9878"/>
+    <rect x="11" y="11" width="4" height="1" fill="#0a0a28"/>
+    <rect x="17" y="11" width="4" height="1" fill="#0a0a28"/>
+    <rect x="10" y="13" width="5" height="1" fill="#3a5888"/>
+    <rect x="10" y="16" width="5" height="1" fill="#3a5888"/>
+    <rect x="10" y="13" width="1" height="4" fill="#3a5888"/>
+    <rect x="14" y="13" width="1" height="4" fill="#3a5888"/>
+    <rect x="17" y="13" width="5" height="1" fill="#3a5888"/>
+    <rect x="17" y="16" width="5" height="1" fill="#3a5888"/>
+    <rect x="17" y="13" width="1" height="4" fill="#3a5888"/>
+    <rect x="21" y="13" width="1" height="4" fill="#3a5888"/>
+    <rect x="15" y="15" width="2" height="1" fill="#3a5888"/>
+    <rect x="11" y="14" width="3" height="2" fill="#1a2a48"/>
+    <rect x="18" y="14" width="3" height="2" fill="#1a2a48"/>
+    <rect x="11" y="14" width="2" height="1" fill="#60b8f8"/>
+    <rect x="18" y="14" width="2" height="1" fill="#60b8f8"/>
+    <rect x="11" y="14" width="1" height="1" fill="#a8d8f8"/>
+    <rect x="18" y="14" width="1" height="1" fill="#a8d8f8"/>
+    <rect x="15" y="17" width="2" height="2" fill="#b87858"/>
+    <rect x="13" y="20" width="6" height="1" fill="#8a3828"/>
+    <rect x="14" y="21" width="4" height="1" fill="#b05040"/>
+    <rect x="10" y="22" width="12" height="2" fill="#d4a080"/>
+    <rect x="13" y="24" width="6" height="3" fill="#cc9878"/>
+    <rect x="7" y="27" width="18" height="5" fill="#1a2a48"/>
+    <rect x="11" y="26" width="3" height="4" fill="#60b8f8"/>
+    <rect x="18" y="26" width="3" height="4" fill="#60b8f8"/>
+    <rect x="14" y="25" width="4" height="3" fill="#0a1828"/>
+    <rect x="7" y="14" width="1" height="1" fill="#f8d800"/>
+    <rect x="24" y="14" width="1" height="1" fill="#f8d800"/>
+  </svg>`),
+
+  // SAM — Negotiator, warm red/orange, friendly face, curly hair
+  sam: makeSVGPortrait(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="96" height="96" shape-rendering="crispEdges">
+    <rect width="32" height="32" fill="#1f100a"/>
+    <rect x="7" y="2" width="18" height="8" fill="#3a1808"/>
+    <rect x="5" y="4" width="22" height="6" fill="#3a1808"/>
+    <rect x="8" y="2" width="3" height="3" fill="#501f0a"/>
+    <rect x="13" y="1" width="3" height="3" fill="#501f0a"/>
+    <rect x="18" y="2" width="3" height="3" fill="#501f0a"/>
+    <rect x="6" y="5" width="2" height="3" fill="#501f0a"/>
+    <rect x="24" y="5" width="2" height="3" fill="#501f0a"/>
+    <rect x="5" y="9" width="3" height="10" fill="#3a1808"/>
+    <rect x="24" y="9" width="3" height="10" fill="#3a1808"/>
+    <rect x="5" y="10" width="2" height="2" fill="#501f0a"/>
+    <rect x="25" y="12" width="2" height="2" fill="#501f0a"/>
+    <rect x="8" y="9" width="16" height="14" fill="#d49060"/>
+    <rect x="7" y="11" width="2" height="10" fill="#c07848"/>
+    <rect x="23" y="11" width="2" height="10" fill="#c07848"/>
+    <rect x="6" y="13" width="2" height="5" fill="#c07848"/>
+    <rect x="24" y="13" width="2" height="5" fill="#c07848"/>
+    <rect x="11" y="12" width="4" height="1" fill="#3a1808"/>
+    <rect x="12" y="11" width="2" height="1" fill="#3a1808"/>
+    <rect x="17" y="12" width="4" height="1" fill="#3a1808"/>
+    <rect x="18" y="11" width="2" height="1" fill="#3a1808"/>
+    <rect x="11" y="13" width="4" height="4" fill="#0a0600"/>
+    <rect x="17" y="13" width="4" height="4" fill="#0a0600"/>
+    <rect x="12" y="14" width="2" height="2" fill="#c05830"/>
+    <rect x="18" y="14" width="2" height="2" fill="#c05830"/>
+    <rect x="12" y="13" width="2" height="1" fill="#f87060"/>
+    <rect x="18" y="13" width="2" height="1" fill="#f87060"/>
+    <rect x="12" y="14" width="1" height="1" fill="#ffa080"/>
+    <rect x="18" y="14" width="1" height="1" fill="#ffa080"/>
+    <rect x="15" y="17" width="2" height="2" fill="#a86038"/>
+    <rect x="14" y="18" width="4" height="1" fill="#a86038"/>
+    <rect x="11" y="20" width="10" height="1" fill="#7a2818"/>
+    <rect x="12" y="21" width="8" height="2" fill="#c04838"/>
+    <rect x="13" y="23" width="6" height="1" fill="#e07060"/>
+    <rect x="11" y="21" width="2" height="1" fill="#f0a090"/>
+    <rect x="19" y="21" width="2" height="1" fill="#f0a090"/>
+    <rect x="9" y="23" width="14" height="2" fill="#c07848"/>
+    <rect x="13" y="25" width="6" height="3" fill="#c07848"/>
+    <rect x="6" y="28" width="20" height="5" fill="#3a1808"/>
+    <rect x="10" y="27" width="4" height="4" fill="#f87060"/>
+    <rect x="18" y="27" width="4" height="4" fill="#f87060"/>
+    <rect x="14" y="26" width="4" height="3" fill="#2a0808"/>
+  </svg>`)
+};
+
+let dialogueReturnFn = null;
+function triggerDialogue(key, returnFn=null) {
+  const d = DIALOGUES[key];
+  if(!d) return;
+  const c = CHARS[d.char];
+  dialogueReturnFn = returnFn;
+
+  // Avatar
+  const avatarEl = document.getElementById('dlg-avatar');
+  if(avatarEl) {
+    avatarEl.style.background = c.bg;
+    avatarEl.style.color = c.color;
+    const portraitSrc = PORTRAITS && PORTRAITS[d.char];
+    if(portraitSrc) {
+      avatarEl.innerHTML = `<img id="dlg-avatar-img" src="${portraitSrc}" class="loaded" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;display:block;">`;
+    } else {
+      avatarEl.textContent = c.init;
+    }
+  }
+
+  // Large portrait above dialogue box
+  const portrait = document.getElementById('dlg-portrait');
+  if(portrait) {
+    const portraitSrc = PORTRAITS && PORTRAITS[d.char];
+    if(portraitSrc) {
+      portrait.src = portraitSrc;
+      portrait.style.borderColor = c.color;
+      portrait.classList.add('loaded');
+    } else {
+      portrait.classList.remove('loaded');
+    }
+  }
+
+  document.getElementById('dlg-name').textContent = c.name;
+  document.getElementById('dlg-role').textContent = c.role;
+  document.getElementById('dlg-text').textContent = d.text;
+  document.getElementById('dlg-subtext').textContent = d.subtext;
+  const choicesEl = document.getElementById('dlg-choices');
+  choicesEl.innerHTML = '';
+  d.choices.forEach(ch=>{
+    const btn = document.createElement('div');
+    btn.className = 'dialogue-choice';
+    btn.textContent = ch.label;
+    btn.onclick = () => {
+      if(ch.log) logDecision(ch.log.decision, ch.log.consequence, ch.log.type||'info');
+      ch.fn();
+    };
+    choicesEl.appendChild(btn);
+  });
+  showScreen('s-dialogue');
+}
+function resumeFromDialogue() {
+  if(dialogueReturnFn) { dialogueReturnFn(); dialogueReturnFn=null; }
+  else { buildGameUI(); showScreen('s-game'); }
+}
+
+//
+//  GAME STATE
+//
+let STATE={}, MODE='leader', PLAYER_CHAR='maya', SELECTED_CHAR=null, ASSIGNMENTS={}, LOGS=[];
+
+function initState() {
+  STATE = {
+    day:1, maxDays:30,
+    food:20, water:14, wood:8, steel:4,
+    morale:70, rescueChance:5,
+    energies:{maya:10,rex:10,lena:10,sam:10},
+    morale_chars:{maya:71,rex:58,lena:65,sam:44},
+    shelterBuilt:false, waterFilter:false, signalFireBuilt:false,
+    spearBuilt:false, medkitBuilt:false, rainBuilt:false, antennaBuilt:false,
+    towerBuilt:false, herbsBuilt:false, raftBuilt:false,
+    buildProgress:0, activeBuild:null,
+    injuries:{}, illnesses:{}, assignments:{},
+    lenaExplored:false, samMoraleDays:0, dialoguesSeen:{},
+    decisionLog:[]  // tracks every meaningful decision for end-of-game consequences
+  };
+  ASSIGNMENTS={};
+  LOGS=[];
+}
+
+function addLog(s, msg, cls='') {
+  LOGS.unshift({msg, cls, day:s.day});
+  if(LOGS.length>10) LOGS.pop();
+}
+
+// Record a player decision for the end-of-game consequences screen
+// type: 'good' | 'bad' | 'warn' | 'info'
+function logDecision(decision, consequence, type='info') {
+  if(!STATE.decisionLog) STATE.decisionLog=[];
+  STATE.decisionLog.push({ day:STATE.day, decision, consequence, type });
+}
+
+function calcOutput(s, task) {
+  const charId = Object.keys(s.assignments||{}).find(c=>s.assignments[c]===task)
+               || Object.keys(ASSIGNMENTS).find(c=>ASSIGNMENTS[c]===task);
+  if(!charId) return 2;
+  const energy = s.energies[charId];
+  const eFactor = energy>=7?1.0:energy>=4?0.75:0.4;
+  const spearBonus = s.spearBuilt && task==='gather-food' ? 1.3 : 1.0;
+  const taskMap = {
+    'gather-food':{maya:0.7,rex:1.5,lena:0.6,sam:1.0},
+    'gather-wood':{maya:0.6,rex:2.0,lena:0.8,sam:0.9},
+    'fetch-water':{maya:0.9,rex:1.1,lena:1.0,sam:1.0},
+    'build':      {maya:0.7,rex:2.0,lena:1.3,sam:0.8},
+    'explore':    {maya:1.2,rex:0.9,lena:1.5,sam:1.0},
+    'signal':     {maya:1.3,rex:0.8,lena:1.0,sam:1.1}
+  };
+  const charFactor = (taskMap[task]&&taskMap[task][charId])||1.0;
+  const base={'gather-food':4,'gather-wood':5,'fetch-water':4,'build':3,'explore':1,'signal':0,'morale':0,'rest':0}[task]||2;
+  return Math.round(base*eFactor*charFactor*spearBonus);
+}
+
+//
+//  SAVE / LOAD
+//
+function saveGame() {
+  const save = {STATE, MODE, PLAYER_CHAR, LOGS, ts: Date.now()};
+  localStorage.setItem('stranded_save', JSON.stringify(save));
+  const btn = document.querySelector('.save-btn');
+  btn.textContent = 'saved +';
+  setTimeout(()=>btn.textContent='save', 1500);
+}
+
+function loadSave() {
+  try {
+    const raw = localStorage.getItem('stranded_save');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function resumeGame() {
+  const save = loadSave();
+  if(!save) return;
+  STATE = save.STATE;
+  MODE = save.MODE;
+  PLAYER_CHAR = save.PLAYER_CHAR;
+  LOGS = save.LOGS || [];
+  ASSIGNMENTS = {};
+  SELECTED_CHAR = null;
+  buildGameUI();
+  showScreen('s-game');
+}
+
+function checkForSave() {
+  const save = loadSave();
+  if(save && save.STATE && save.STATE.day > 1) {
+    document.getElementById('btn-resume').style.display = 'block';
+    document.getElementById('resume-day').textContent = save.STATE.day;
+    document.getElementById('save-notice').style.display = 'block';
+    document.getElementById('save-notice').textContent = `Saved game found -- Day ${save.STATE.day} of 30`;
+  }
+}
+
+//
+//  SCREENS
+//
+function showScreen(id) {
+  const overlay = document.getElementById('transition-overlay');
+  overlay.classList.add('flash');
+  setTimeout(() => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    overlay.classList.remove('flash');
+    // Restart ticker when returning to game screen
+    if(id === 's-game' && STATE.activeBuild) {
+      updateBuildTarget();
+      startBuildTicker();
+    } else if(id !== 's-game') {
+      stopBuildTicker();
+    }
+  }, 80);
+}
+
+function selectMode(m) {
+  MODE=m;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('mode-'+m).classList.add('selected');
+}
+
+function startGame() {
+  if(MODE==='coop') { buildCharSelect(); showScreen('s-charsel'); }
+  else { PLAYER_CHAR=null; initState(); triggerDialogue('day1'); }
+}
+
+let selectedCharForCoop='maya';
+function buildCharSelect() {
+  const grid = document.getElementById('char-grid-select');
+  grid.innerHTML='';
+  Object.entries(CHARS).forEach(([id,c])=>{
+    const div=document.createElement('div');
+    div.className='char-select-card px-box'+(id===selectedCharForCoop?' selected':'');
+    div.style.borderColor=id===selectedCharForCoop?c.color:'';
+    const portraitSrc = PORTRAITS && PORTRAITS[id] ? PORTRAITS[id] : '';
+    const avatarHTML = portraitSrc
+      ? `<img src="${portraitSrc}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;border:2px solid var(--black);box-shadow:2px 2px 0 var(--black);border-color:${c.color}" alt="${c.name}">`
+      : `<div class="csc-avatar" style="background:${c.bg};color:${c.color}">${c.init}</div>`;
+    const SC = {planning:'#60b8f8',strength:'#f87800',crafting:'#f8d800',morale_aura:'#f87060',resilience:'#38d888'};
+    const allStats = Object.entries(c.stats).map(([k,v])=>{
+      const col = SC[k]||'var(--sky)';
+      return `<div class="stat-mini-row">
+        <span class="stat-mini-lbl" style="color:${col}">${k.replace('_',' ')}</span>
+        <div class="stat-mini-bar"><div class="stat-mini-fill" style="width:${v}%;background:${col}"></div></div>
+        <span style="font-family:var(--font-px);font-size:6px;color:${col};width:20px;text-align:right;flex-shrink:0">${v}</span>
+      </div>`;
+    }).join('');
+    div.innerHTML=`<div class="csc-top">${avatarHTML}<div><div class="csc-name">${c.name}</div><div class="csc-role" style="color:${c.color}">${c.role}</div></div></div><div class="csc-bio">${c.bio}</div><div class="stat-mini">${allStats}</div><div class="csc-weakness"><span class="csc-weakness-lbl">Weakness:</span> ${c.weakness}</div>`;
+    div.onclick=()=>{
+      selectedCharForCoop=id;
+      document.getElementById('selected-char-name').textContent=c.name;
+      document.querySelectorAll('.char-select-card').forEach(el=>{el.classList.remove('selected');el.style.borderColor='';});
+      div.classList.add('selected');
+      div.style.borderColor=c.color;
+    };
+    grid.appendChild(div);
+  });
+}
+
+function confirmCharSelect() {
+  PLAYER_CHAR=selectedCharForCoop;
+  initState();
+  triggerDialogue('day1');
+}
+
+//
+//  GAME UI
+//
+function buildGameUI() {
+  renderTopbar();
+  renderResources();
+  renderChars();
+  renderTaskPanel(SELECTED_CHAR);
+  renderCraftPanel();
+  renderLog();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function renderTopbar() {
+  document.getElementById('day-display').textContent=`Day ${STATE.day} of ${STATE.maxDays}`;
+  const pct=Math.round(STATE.morale);
+  const mBar=document.getElementById('morale-bar');
+  mBar.style.width=pct+'%';
+  mBar.style.background=pct<30?'var(--red2)':pct<50?'var(--amber)':'var(--teal2)';
+  document.getElementById('morale-val').textContent=pct;
+  document.getElementById('morale-val').style.color=pct<30?'var(--red2)':pct<50?'var(--amber)':'var(--teal2)';
+  const rp=Math.round(STATE.rescueChance);
+  document.getElementById('rescue-bar').style.width=rp+'%';
+  document.getElementById('rescue-pct').textContent=rp+'%';
+}
+
+// ── Resource pixel-art SVG icons ──────────────────────────
+const RES_ICONS = {
+  food: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <!-- drumstick / food -->
+    <rect x="9" y="1" width="3" height="2" fill="#f0d0a0"/>
+    <rect x="8" y="3" width="5" height="2" fill="#e8b870"/>
+    <rect x="7" y="5" width="6" height="2" fill="#e83030"/>
+    <rect x="6" y="7" width="6" height="3" fill="#c82020"/>
+    <rect x="5" y="9" width="5" height="3" fill="#e83030"/>
+    <rect x="4" y="11" width="4" height="2" fill="#c82020"/>
+    <rect x="3" y="12" width="3" height="2" fill="#a01010"/>
+    <rect x="2" y="13" width="3" height="1" fill="#f0d0a0"/>
+    <rect x="1" y="12" width="3" height="2" fill="#f0d0a0"/>
+    <rect x="2" y="11" width="2" height="2" fill="#e8c890"/>
+    <!-- shine -->
+    <rect x="8" y="6" width="2" height="1" fill="#ff8080"/>
+    <rect x="9" y="5" width="1" height="1" fill="#ffa0a0"/>
+  </svg>`,
+
+  water: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <!-- droplet -->
+    <rect x="7" y="1" width="2" height="2" fill="#60b8f8"/>
+    <rect x="6" y="3" width="4" height="2" fill="#60b8f8"/>
+    <rect x="5" y="5" width="6" height="2" fill="#60b8f8"/>
+    <rect x="4" y="7" width="8" height="3" fill="#60b8f8"/>
+    <rect x="5" y="10" width="6" height="2" fill="#60b8f8"/>
+    <rect x="6" y="12" width="4" height="2" fill="#60b8f8"/>
+    <rect x="7" y="14" width="2" height="1" fill="#60b8f8"/>
+    <!-- inner shine -->
+    <rect x="6" y="6" width="2" height="3" fill="#a8d8f8"/>
+    <rect x="5" y="8" width="2" height="1" fill="#c8e8ff"/>
+    <!-- wave highlight -->
+    <rect x="8" y="9" width="2" height="1" fill="#2890d8"/>
+    <rect x="9" y="8" width="1" height="2" fill="#2890d8"/>
+  </svg>`,
+
+  wood: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <!-- log side view -->
+    <rect x="1" y="5" width="14" height="7" fill="#885820"/>
+    <rect x="1" y="5" width="14" height="2" fill="#a06828"/>
+    <rect x="1" y="11" width="14" height="1" fill="#603808"/>
+    <!-- grain lines -->
+    <rect x="3" y="7" width="10" height="1" fill="#6a4010" opacity="0.6"/>
+    <rect x="3" y="9" width="10" height="1" fill="#6a4010" opacity="0.6"/>
+    <!-- end caps -->
+    <rect x="1" y="5" width="2" height="7" fill="#c88038"/>
+    <rect x="13" y="5" width="2" height="7" fill="#7a4818"/>
+    <!-- knot -->
+    <rect x="7" y="7" width="2" height="2" fill="#6a3808"/>
+    <rect x="6" y="8" width="4" height="1" fill="#6a3808"/>
+    <!-- top highlight -->
+    <rect x="2" y="5" width="12" height="1" fill="#d8a050"/>
+  </svg>`,
+
+  steel: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <!-- steel bolt / scrap plate -->
+    <rect x="2" y="4" width="12" height="8" fill="#6a7888"/>
+    <rect x="2" y="4" width="12" height="2" fill="#8a9aaa"/>
+    <rect x="2" y="10" width="12" height="2" fill="#485868"/>
+    <!-- rivets -->
+    <rect x="3" y="5" width="2" height="2" fill="#a8b8c8"/>
+    <rect x="11" y="5" width="2" height="2" fill="#a8b8c8"/>
+    <rect x="3" y="9" width="2" height="2" fill="#384858"/>
+    <rect x="11" y="9" width="2" height="2" fill="#384858"/>
+    <!-- centre stripe -->
+    <rect x="2" y="7" width="12" height="2" fill="#586878"/>
+    <!-- highlight scratch -->
+    <rect x="5" y="6" width="6" height="1" fill="#c8d8e8"/>
+    <rect x="6" y="8" width="4" height="1" fill="#384858"/>
+    <!-- side edges -->
+    <rect x="2" y="4" width="1" height="8" fill="#9aaaba"/>
+    <rect x="13" y="4" width="1" height="8" fill="#384858"/>
+  </svg>`,
+};
+
+function renderResources() {
+  const s=STATE;
+  const rain=s.rainBuilt?4:0;
+  const foodCrit=s.food<4;
+  const waterCrit=s.water<4;
+  document.getElementById('resources-row').innerHTML=`
+    <div class="res-cell px-box${foodCrit?' critical':''}">
+      <div class="res-icon">${RES_ICONS.food}</div>
+      <div class="res-val">${Math.round(s.food)}</div>
+      <div class="res-lbl">Calories</div>
+      <div class="res-delta" style="color:var(--red2)">-8/day</div>
+    </div>
+    <div class="res-cell px-box${waterCrit?' critical':''}">
+      <div class="res-icon">${RES_ICONS.water}</div>
+      <div class="res-val">${Math.round(s.water)}L</div>
+      <div class="res-lbl">Water</div>
+      <div class="res-delta" style="color:var(--blue2)">-${6-rain}/day</div>
+    </div>
+    <div class="res-cell px-box">
+      <div class="res-icon">${RES_ICONS.wood}</div>
+      <div class="res-val">${Math.round(s.wood)}</div>
+      <div class="res-lbl">Wood</div>
+      <div class="res-delta" style="color:var(--muted)">stockpile</div>
+    </div>
+    <div class="res-cell px-box">
+      <div class="res-icon">${RES_ICONS.steel}</div>
+      <div class="res-val">${Math.round(s.steel)}</div>
+      <div class="res-lbl">Steel</div>
+      <div class="res-delta" style="color:var(--muted)">limited</div>
+    </div>`;
+}
+
+function renderChars() {
+  const row=document.getElementById('chars-row');
+  row.innerHTML='';
+  const chars=MODE==='leader'?Object.keys(CHARS):[PLAYER_CHAR];
+  row.style.gridTemplateColumns=`repeat(${chars.length},1fr)`;
+  chars.forEach(id=>{
+    const c=CHARS[id];
+    const assigned=ASSIGNMENTS[id];
+    const energy=STATE.energies[id];
+    const morale=Math.round(STATE.morale_chars[id]);
+    const injury=STATE.injuries[id]>0;
+    const illness=STATE.illnesses[id]>0;
+    const isSelected=SELECTED_CHAR===id;
+    const isWarning=morale<35||injury||illness;
+    const div=document.createElement('div');
+    div.className='char-cell px-box'+(assigned?' assigned':'')+(isSelected?' selected':'')+(isWarning?' warning':'')+(injury||illness?' injured':'');
+    const portraitSrc = PORTRAITS && PORTRAITS[id] ? PORTRAITS[id] : '';
+    const portraitHTML = portraitSrc
+      ? `<img class="char-portrait-thumb" src="${portraitSrc}" alt="${c.name}" style="border-color:${c.color}">`
+      : `<div class="char-initials" style="color:${c.color}">${c.init}</div>`;
+
+    // Each stat gets its own distinct colour — easy to read at a glance
+    const STAT_COLORS = {
+      planning:    '#60b8f8', // blue
+      strength:    '#f87800', // orange
+      crafting:    '#f8d800', // yellow
+      morale_aura: '#f87060', // red-pink
+      resilience:  '#38d888', // green
+    };
+    const statsHTML = Object.entries(c.stats).map(([k,v]) => {
+      const fillColor = STAT_COLORS[k] || 'var(--sky)';
+      const shortLabel = {planning:'plan',strength:'str',crafting:'craft',morale_aura:'mora',resilience:'res'}[k] || k.slice(0,4);
+      return `<div class="char-stat-row">
+        <span class="char-stat-lbl" style="color:${fillColor}">${shortLabel}</span>
+        <div class="char-stat-track"><div class="char-stat-fill" style="width:${v}%;background:${fillColor}"></div></div>
+        <span style="font-family:var(--font-px);font-size:5px;color:${fillColor};width:16px;text-align:right;flex-shrink:0">${v}</span>
+      </div>`;
+    }).join('');
+
+    const taskStatus = injury ? 'injured' : illness ? 'ill' : assigned ? TASKS.find(t=>t.id===assigned)?.label||'' : '! IDLE';
+    const taskClass = injury||illness ? 'char-task-sm' : assigned ? 'char-task-sm active' : 'char-task-sm idle';
+    div.innerHTML=`${portraitHTML}<div class="char-name-sm">${c.name}</div><div class="${taskClass}">${taskStatus}</div><div class="char-stats">${statsHTML}</div><div class="energy-bar" style="margin-top:4px"><div class="energy-fill" style="width:${Math.round(energy/10*100)}%;background:${c.color}"></div></div><div class="char-mood-sm" style="color:${morale<35?'var(--red2)':morale>70?'var(--teal2)':'var(--amber)'}">morale: ${morale}</div>`;
+    div.onclick=()=>selectChar(id);
+    row.appendChild(div);
+  });
+}
+
+function selectChar(id) {
+  if(STATE.injuries[id]>0||STATE.illnesses[id]>0) return;
+  SELECTED_CHAR=id;
+  renderTaskPanel(id);
+  renderChars();
+}
+
+function renderTaskPanel(charId) {
+  const label=document.getElementById('task-label');
+  const hint=document.getElementById('task-hint');
+  const grid=document.getElementById('task-grid');
+  if(!charId){label.textContent='Select a survivor to assign a task';hint.textContent='Click any character card above';grid.style.display='none';return;}
+  const c=CHARS[charId];
+  label.textContent=`Assign task to ${c.name}`;
+  hint.innerHTML=`<span style="font-family:var(--font-px);font-size:6px;color:var(--red2);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:2px;">Weakness</span>${c.weakness}`;
+  grid.style.display='grid';
+  grid.innerHTML='';
+  TASKS.forEach(t=>{
+    const isAssigned=ASSIGNMENTS[charId]===t.id;
+    const btn=document.createElement('div');
+    btn.className='task-btn'+(isAssigned?' assigned':'');
+    btn.innerHTML=`<div class="task-btn-title">${t.label}</div><div class="task-btn-cost">${t.cost}</div>`;
+    btn.onclick=()=>{
+      if(isAssigned)delete ASSIGNMENTS[charId];
+      else ASSIGNMENTS[charId]=t.id;
+      renderChars();
+      renderTaskPanel(charId);
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── Real-time build progress ticker ──────────────────────
+let _buildTicker = null;
+let _buildAnimPct = 0;   // smooth animated %, 0–100
+let _buildTargetPct = 0; // actual game %, snaps on END DAY
+
+function startBuildTicker() {
+  if(_buildTicker) return; // already running
+  _buildTicker = setInterval(() => {
+    if(!STATE.activeBuild) { stopBuildTicker(); return; }
+    const item = CRAFT_ITEMS.find(i=>i.id===STATE.activeBuild);
+    if(!item) { stopBuildTicker(); return; }
+
+    // Smoothly animate toward target
+    _buildAnimPct += (_buildTargetPct - _buildAnimPct) * 0.08;
+    if(Math.abs(_buildAnimPct - _buildTargetPct) < 0.1) _buildAnimPct = _buildTargetPct;
+
+    // Update DOM directly — no full re-render
+    const fill = document.getElementById('build-fill-live');
+    const lbl  = document.getElementById('build-lbl-live');
+    const eta  = document.getElementById('build-eta-live');
+    if(fill) {
+      fill.style.width = _buildAnimPct.toFixed(1) + '%';
+    }
+    if(lbl) {
+      lbl.textContent = Math.round(_buildAnimPct) + '%';
+    }
+    if(eta) {
+      const turnsLeft = item.turns - STATE.buildProgress;
+      eta.textContent = turnsLeft > 0 ? `~${turnsLeft} turn${turnsLeft===1?'':'s'} left` : 'almost done';
+    }
+  }, 50); // 20fps smooth animation
+}
+
+function stopBuildTicker() {
+  if(_buildTicker) { clearInterval(_buildTicker); _buildTicker=null; }
+}
+
+function updateBuildTarget() {
+  if(!STATE.activeBuild) { _buildTargetPct=0; return; }
+  const item = CRAFT_ITEMS.find(i=>i.id===STATE.activeBuild);
+  if(!item) { _buildTargetPct=0; return; }
+  _buildTargetPct = Math.min(100, Math.round((STATE.buildProgress / item.turns) * 100));
+}
+
+function cancelBuild() {
+  const s = STATE;
+  if(!s.activeBuild) return;
+  const item = CRAFT_ITEMS.find(i=>i.id===s.activeBuild);
+  if(!item) return;
+
+  // Refund 100% of spent resources
+  const c = item.cost;
+  if(c.wood)  s.wood  += c.wood;
+  if(c.steel) s.steel += c.steel;
+  if(c.fibre) s.wood  += Math.ceil(c.fibre/2); // fibre was converted from wood
+
+  addLog(s, `Cancelled ${item.name}. All resources refunded.`, 'warn');
+  s.activeBuild = null;
+  s.buildProgress = 0;
+  stopBuildTicker();
+  _buildAnimPct = 0;
+  _buildTargetPct = 0;
+  renderCraftPanel();
+  renderResources();
+}
+
+// Small 13x13 pixel SVG icons for craft price row — prebuilt, no string manipulation
+const PRICE_ICONS = {
+  wood: '<svg viewBox="0 0 16 16" width="13" height="13" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;flex-shrink:0"><rect x="1" y="5" width="14" height="7" fill="#885820"/><rect x="1" y="5" width="14" height="2" fill="#a06828"/><rect x="1" y="11" width="14" height="1" fill="#603808"/><rect x="3" y="7" width="10" height="1" fill="#6a4010" opacity="0.6"/><rect x="3" y="9" width="10" height="1" fill="#6a4010" opacity="0.6"/><rect x="1" y="5" width="2" height="7" fill="#c88038"/><rect x="13" y="5" width="2" height="7" fill="#7a4818"/><rect x="7" y="7" width="2" height="2" fill="#6a3808"/><rect x="2" y="5" width="12" height="1" fill="#d8a050"/></svg>',
+  steel:'<svg viewBox="0 0 16 16" width="13" height="13" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;flex-shrink:0"><rect x="2" y="4" width="12" height="8" fill="#6a7888"/><rect x="2" y="4" width="12" height="2" fill="#8a9aaa"/><rect x="2" y="10" width="12" height="2" fill="#485868"/><rect x="3" y="5" width="2" height="2" fill="#a8b8c8"/><rect x="11" y="5" width="2" height="2" fill="#a8b8c8"/><rect x="2" y="7" width="12" height="2" fill="#586878"/><rect x="5" y="6" width="6" height="1" fill="#c8d8e8"/><rect x="2" y="4" width="1" height="8" fill="#9aaaba"/></svg>',
+};
+
+// Build a restaurant-menu style price line: build time ......... icon N + icon N
+function buildMenuPriceLine(item, s) {
+  const c = item.cost;
+  const costs = [];
+  if(c.wood)  costs.push({ iconKey:'wood',  amount: c.wood,  have: s.wood,  label:'wood'  });
+  if(c.steel) costs.push({ iconKey:'steel', amount: c.steel, have: s.steel, label:'steel' });
+  if(c.fibre) costs.push({ iconKey:'wood',  amount: c.fibre, have: s.wood * 2, label:'fibre' });
+
+  const costItemsHTML = costs.map(function(res, i) {
+    const cls = res.have >= res.amount ? 'ok' : 'low';
+    const icon = PRICE_ICONS[res.iconKey] || '';
+    const sep = i > 0 ? '<span class="craft-cost-sep">+</span>' : '';
+    return sep + '<span class="craft-cost-item">' + icon + '<span class="craft-cost-num ' + cls + '">' + res.amount + ' ' + res.label + '</span></span>';
+  }).join('');
+
+  const turns = item.turns + ' turn' + (item.turns === 1 ? '' : 's');
+  return '<div class="craft-prices"><div class="craft-menu-items">'
+    + '<span style="font-family:var(--font-px);font-size:6px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap">' + turns + '</span>'
+    + '<div class="craft-menu-dots"></div>'
+    + '<div class="craft-menu-cost">' + costItemsHTML + '</div>'
+    + '</div></div>';
+}
+
+function renderCraftPanel() {
+  const s=STATE;
+  const panel=document.getElementById('craft-panel');
+  panel.innerHTML='';
+
+  CRAFT_ITEMS.forEach(item=>{
+    const isBuilt   = s[item.stateKey];
+    const isActive  = s.activeBuild===item.id;
+    const canAfford = hasCraftResources(s,item);
+    const pct       = isActive ? Math.min(100, Math.round((s.buildProgress/item.turns)*100)) : 0;
+    const turnsLeft = isActive ? Math.max(0, item.turns - s.buildProgress) : 0;
+
+    const div=document.createElement('div');
+    div.className='craft-item' + (isActive?' active-item':'');
+
+    let btnClass='cant', btnText='Need more', btnDisabled=true;
+    if(isBuilt)       { btnClass='built';        btnText='✓ Built';   btnDisabled=true;  }
+    else if(isActive) { btnClass='active-build';  btnText='Building…'; btnDisabled=true;  }
+    else if(canAfford){ btnClass='can';            btnText='Build';     btnDisabled=false; }
+
+    // Build menu price line
+    const pricesHTML = !isBuilt ? buildMenuPriceLine(item, s) : '';
+
+    const progressHTML = isActive
+      ? '<div class="craft-progress-wrap">'
+        + '<div class="craft-progress-lbl"><span id="build-lbl-live">' + pct + '%</span>'
+        + '<span class="craft-progress-eta" id="build-eta-live">~' + turnsLeft + ' turn' + (turnsLeft===1?'':'s') + ' left</span></div>'
+        + '<div class="craft-progress-bar"><div class="craft-progress-fill ticking" id="build-fill-live" style="width:' + pct + '%"></div></div>'
+        + '</div>'
+      : '';
+
+    // Button column: main action + cancel (if active)
+    const btnGroupHTML = isActive
+      ? '<div class="craft-btn-group"><button class="craft-btn active-build" disabled>Building\u2026</button><button class="craft-btn cancel" id="cancel-build-btn">\u2715 Cancel</button></div>'
+      : '<button class="craft-btn ' + btnClass + '" ' + (btnDisabled?'disabled':'') + '>' + btnText + '</button>';
+
+    const builtLabel = isBuilt
+      ? '<div class="craft-turns" style="color:var(--green2)">&#10003; complete</div>'
+      : '<div class="craft-turns">' + item.turns + ' turn' + (item.turns===1?'':'s') + ' to build</div>';
+
+    div.innerHTML = '<div class="craft-item-top">'
+      + '<div class="craft-icon">' + item.icon + '</div>'
+      + '<div class="craft-info"><div class="craft-name">' + item.name + '<span class="tier-label tier-' + item.tier + '">T' + item.tier + '</span></div>' + builtLabel + '</div>'
+      + btnGroupHTML
+      + '</div>'
+      + pricesHTML
+      + progressHTML;
+
+    // Wire build button
+    if(!btnDisabled && !isActive){
+      div.querySelector('.craft-btn').onclick=()=>{
+        spendCraftResources(s,item);
+        s.activeBuild=item.id;
+        s.buildProgress=0;
+        _buildAnimPct=0;
+        updateBuildTarget();
+        renderCraftPanel();
+        renderResources();
+        addLog(s,`Started building: ${item.name}.`,'');
+        startBuildTicker();
+      };
+    }
+
+    // Wire cancel button
+    if(isActive){
+      div.querySelector('#cancel-build-btn').onclick=()=>cancelBuild();
+    }
+
+    panel.appendChild(div);
+  });
+
+  // Sync animation target with current state
+  updateBuildTarget();
+  if(s.activeBuild) startBuildTicker();
+}
+
+function renderLog() {
+  const el=document.getElementById('log-entries');
+  el.innerHTML=LOGS.length
+    ?LOGS.map(l=>`<div class="log-entry ${l.cls}">Day ${l.day}: ${l.msg}</div>`).join('')
+    :'<div class="log-entry">Day 1: Plane down. Alive. Make it count.</div>';
+}
+
+//
+//  DAY REPORT
+//
+function showDayReport(dayNum, onContinue) {
+  const s = STATE;
+  const rain = s.rainBuilt ? 4 : 0;
+
+  // ── Day label ──
+  document.getElementById('dr-day-label').textContent = `End of Day ${dayNum}`;
+
+  // ── Resources ──
+  const resCells = [
+    { key:'food',  val:Math.round(s.food),  suffix:'',  delta:`-8/day`, crit:s.food<4,  icon:RES_ICONS.food,  col:'var(--red2)' },
+    { key:'water', val:Math.round(s.water), suffix:'L', delta:`-${6-rain}/day`, crit:s.water<4, icon:RES_ICONS.water, col:'var(--blue2)' },
+    { key:'wood',  val:Math.round(s.wood),  suffix:'',  delta:'stockpile', crit:false, icon:RES_ICONS.wood, col:'var(--sand)' },
+    { key:'steel', val:Math.round(s.steel), suffix:'',  delta:'limited',   crit:false, icon:RES_ICONS.steel, col:'var(--muted)' },
+  ];
+  document.getElementById('dr-resources').innerHTML = resCells.map(r=>`
+    <div class="dr-res-cell${r.crit?' crit':''}">
+      <div class="dr-res-icon">${r.icon}</div>
+      <div class="dr-res-val">${r.val}${r.suffix}</div>
+      <div class="dr-res-delta" style="color:${r.crit?'var(--red2)':r.col}">${r.delta}</div>
+    </div>`).join('');
+
+  // ── Rescue bar ──
+  const rp = Math.round(s.rescueChance);
+  document.getElementById('dr-rescue-fill').style.width = rp+'%';
+  document.getElementById('dr-rescue-pct').textContent = rp+'%';
+
+  // ── Characters ──
+  const charOrder = Object.keys(CHARS);
+  document.getElementById('dr-chars').innerHTML = charOrder.map(id=>{
+    const c = CHARS[id];
+    const energy = s.energies[id];
+    const morale = Math.round(s.morale_chars[id]);
+    const injury = s.injuries[id]>0;
+    const illness = s.illnesses[id]>0;
+    const assigned = s.assignments[id];
+    const taskLabel = injury?'Injured':illness?'Ill':assigned?TASKS.find(t=>t.id===assigned)?.label||'—':'Idle';
+    const taskCls = injury||illness?'':'active-item'in{}?'':assigned?'active':'idle';
+    const cardCls = (morale<35||injury||illness)?'warning':'';
+    const injuryCardCls = injury||illness?'injured':'';
+    const portraitSrc = PORTRAITS && PORTRAITS[id] ? PORTRAITS[id] : '';
+    const portraitHTML = portraitSrc
+      ? `<img class="dr-char-portrait" src="${portraitSrc}" alt="${c.name}" style="border-color:${c.color}">`
+      : `<div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:var(--font-px);font-size:10px;color:${c.color};background:${c.bg};border:2px solid var(--black);margin:0 auto 4px">${c.init}</div>`;
+    return `<div class="dr-char-card ${cardCls} ${injuryCardCls}">
+      ${portraitHTML}
+      <span class="dr-char-name" style="color:${c.color}">${c.name}</span>
+      <span class="dr-char-task ${assigned&&!injury&&!illness?'active':injury||illness?'bad':'idle'}">${taskLabel}</span>
+      <div class="dr-bar-row">
+        <span class="dr-bar-lbl" style="color:var(--teal2)">nrg</span>
+        <div class="dr-bar-track"><div class="dr-bar-fill" style="width:${Math.round(energy/10*100)}%;background:${c.color}"></div></div>
+      </div>
+      <div class="dr-bar-row">
+        <span class="dr-bar-lbl" style="color:var(--red2)">mor</span>
+        <div class="dr-bar-track"><div class="dr-bar-fill" style="width:${morale}%;background:${morale<35?'var(--red2)':morale>70?'var(--teal2)':'var(--amber)'}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Events (last 5 log entries for this day) ──
+  const icons = {good:'✓',bad:'✗',warn:'!','':`·`};
+  const todayLogs = LOGS.filter(l=>l.day===dayNum).slice(0,6);
+  document.getElementById('dr-events').innerHTML = todayLogs.length
+    ? todayLogs.map(l=>`<div class="dr-event-item ${l.cls}"><span class="dr-event-icon ${l.cls}">${icons[l.cls]||'·'}</span>${l.msg}</div>`).join('')
+    : `<div class="dr-event-item"><span class="dr-event-icon">·</span>No notable events today.</div>`;
+
+  // ── Continue button ──
+  const btn = document.getElementById('dr-continue-btn');
+  btn.onclick = onContinue;
+
+  showScreen('s-dayreport');
+}
+function endDay() {
+  const s=STATE;
+  s.assignments={...ASSIGNMENTS};
+
+  // ── Track notable task assignment decisions ──
+  // Rex misassigned away from his strengths
+  if(ASSIGNMENTS.rex && !['build','gather-wood','gather-food'].includes(ASSIGNMENTS.rex)) {
+    logDecision(`Day ${s.day}: Rex assigned to "${TASKS.find(t=>t.id===ASSIGNMENTS.rex)?.label}"`,
+      'Rex\'s strength (95) and crafting (90) wasted. Output 40–60% below potential.',
+      'warn');
+  }
+  // Rex on build — good
+  if(ASSIGNMENTS.rex==='build' && !s._rexBuildLogged) {
+    s._rexBuildLogged=true;
+    logDecision(`Day ${s.day}: Rex assigned to Build (first time)`,
+      'Rex\'s 2× build multiplier active. Build progress accelerating.','good');
+  }
+  // Sam on morale — good (log once)
+  if(ASSIGNMENTS.sam==='morale' && !s._samMoraleLogged) {
+    s._samMoraleLogged=true;
+    logDecision(`Day ${s.day}: Sam assigned to Boost Morale (first time)`,
+      'Sam\'s morale aura (95) applied. +8 team morale per turn assigned.','good');
+  }
+  // Lena left idle — morale penalty
+  if(!ASSIGNMENTS.lena && !s._lenaIdleLogged) {
+    s._lenaIdleLogged=true;
+    logDecision(`Day ${s.day}: Lena left unassigned`,
+      'Team morale -5 this day. Lena\'s analytical output generates team anxiety when idle.','bad');
+  }
+  // All 4 characters assigned — good
+  if(Object.keys(ASSIGNMENTS).length===4 && !s._allAssignedLogged) {
+    s._allAssignedLogged=true;
+    logDecision(`Day ${s.day}: All four survivors assigned tasks`,
+      'Full team utilisation. Maximum daily output achieved.','good');
+  }
+  // Critical food warning
+  if(s.food<6 && !s._foodCritLogged) {
+    s._foodCritLogged=true;
+    logDecision(`Day ${s.day}: Food dropped to critical (${Math.round(s.food)} units)`,
+      'Morale penalties compounding daily. Rex should be on Gather Food immediately.','bad');
+  }
+  // Critical water warning
+  if(s.water<4 && !s._waterCritLogged) {
+    s._waterCritLogged=true;
+    logDecision(`Day ${s.day}: Water dropped to critical (${Math.round(s.water)}L)`,
+      'Morale -8/day. Risk of dehydration illness cascade. Fetch Water is now the top priority.','bad');
+  }
+  // Shelter built — log it
+  if(!s.shelterBuilt && s.activeBuild==='shelter') {
+    // will log on completion via craft effect
+  }
+
+  // Task resolution
+  Object.entries(ASSIGNMENTS).forEach(([charId,taskId])=>{
+    const task=TASKS.find(t=>t.id===taskId);
+    if(!task) return;
+    const costs={'gather-food':-3,'gather-wood':-3,'fetch-water':-2,'build':-4,'morale':-1,'rest':4,'signal':-2,'explore':-3};
+    s.energies[charId]=Math.max(0,Math.min(10,s.energies[charId]+(costs[taskId]||-2)));
+    if(taskId==='explore'&&charId==='lena') s.lenaExplored=true;
+    if(taskId==='morale'&&charId==='sam') s.samMoraleDays=(s.samMoraleDays||0)+1;
+    task.effect(s);
+  });
+
+  // Build progress check
+  if(s.activeBuild) {
+    const item=CRAFT_ITEMS.find(i=>i.id===s.activeBuild);
+    if(item && s.buildProgress>=item.turns) {
+      item.effect(s);
+      s.activeBuild=null;
+      s.buildProgress=0;
+      stopBuildTicker();
+      _buildAnimPct=0;
+      _buildTargetPct=0;
+    } else {
+      // Snap animation forward to new target
+      updateBuildTarget();
+    }
+  }
+
+  // Daily consumption
+  s.food=Math.max(0,s.food-8);
+  s.water=Math.max(0,s.water-(s.rainBuilt?2:6));
+
+  // Energy recovery for unassigned
+  Object.keys(CHARS).forEach(id=>{if(!ASSIGNMENTS[id])s.energies[id]=Math.min(10,s.energies[id]+2);});
+
+  // Morale
+  s.morale=Math.max(0,s.morale-3);
+  if(s.food<4){s.morale-=5;addLog(s,'Hunger hitting morale.','bad');}
+  if(s.water<4){s.morale-=8;addLog(s,'Dehydration is dangerous.','bad');}
+  if(!ASSIGNMENTS.lena){s.morale=Math.max(0,s.morale-5);addLog(s,'Lena unassigned -- morale drifting.','warn');}
+  Object.keys(CHARS).forEach(id=>{s.morale_chars[id]=Math.max(0,Math.min(100,s.morale_chars[id]+(Math.random()*6-3)));});
+  if(ASSIGNMENTS.sam==='morale') s.morale_chars.sam=Math.min(100,s.morale_chars.sam+8);
+
+  // Injury/illness recovery
+  Object.keys(s.injuries).forEach(id=>{if(s.injuries[id]>0){s.injuries[id]--;if(s.medkitBuilt)s.injuries[id]=Math.max(0,s.injuries[id]-1);}});
+  Object.keys(s.illnesses).forEach(id=>{if(s.illnesses[id]>0)s.illnesses[id]--;});
+
+  // Herb garden passive: reduce injuries/illnesses by 1 each day
+  if(s.herbsBuilt) {
+    Object.keys(s.injuries).forEach(id=>{if(s.injuries[id]>0) s.injuries[id]=Math.max(0,s.injuries[id]-1);});
+    Object.keys(s.illnesses).forEach(id=>{if(s.illnesses[id]>0) s.illnesses[id]=Math.max(0,s.illnesses[id]-1);});
+  }
+
+  // Tower bonus: Lena's explore tasks give +1 steel extra
+  if(s.towerBuilt && ASSIGNMENTS.lena==='explore') {
+    s.steel+=1;
+  }
+
+  // Low morale dialogue trigger
+  if(s.morale<30 && !s.dialoguesSeen.low_morale) {
+    s.dialoguesSeen.low_morale=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('low_morale',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Day 5 — Lena's resource forecast
+  if(s.day===5 && !s.dialoguesSeen.day5) {
+    s.dialoguesSeen.day5=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('day5',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Day 10 — Maya's halfway reminder
+  if(s.day===10 && !s.dialoguesSeen.day10) {
+    s.dialoguesSeen.day10=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('day10',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Day 15 — Maya/Rex conflict if Rex has low morale
+  if(s.day===15 && !s.dialoguesSeen.maya_rex_conflict && s.morale_chars.rex<50) {
+    s.dialoguesSeen.maya_rex_conflict=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('maya_rex_conflict',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Food crisis dialogue if food very low
+  if(s.food<6 && !s.dialoguesSeen.food_crisis) {
+    s.dialoguesSeen.food_crisis=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('food_crisis',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Rescue eve — triggered when rescue chance passes 70%
+  if(s.rescueChance>=70 && !s.dialoguesSeen.rescue_eve) {
+    s.dialoguesSeen.rescue_eve=true;
+    const d = s.day; s.day++;
+    saveGame();
+    triggerDialogue('rescue_eve',()=>{ showDayReport(d,()=>{buildGameUI();showScreen('s-game');}); });
+    return;
+  }
+
+  // Rescue check
+  if(Math.random()*100<s.rescueChance){showRescueScore(true);return;}
+
+  const completedDay = s.day;
+  s.day++;
+  if(s.day>s.maxDays){showRescueScore(false);return;}
+
+  // Auto-save every day
+  saveGame();
+
+  // Crisis roll
+  const crisisThreshold=s.shelterBuilt?0.22:0.28;
+  const hasCrisis = Math.random()<crisisThreshold;
+  const crisisEvent = hasCrisis ? CRISIS_DECK[Math.floor(Math.random()*CRISIS_DECK.length)] : null;
+
+  // Show day report first, then proceed to crisis or next day
+  showDayReport(completedDay, ()=>{
+    ASSIGNMENTS={};
+    SELECTED_CHAR=null;
+    if(crisisEvent) {
+      showCrisis(crisisEvent);
+    } else {
+      buildGameUI();
+      showScreen('s-game');
+    }
+  });
+}
+
+//
+//  CRISIS
+//
+function showCrisis(event) {
+  document.getElementById('crisis-type').textContent=event.type;
+  document.getElementById('crisis-title').textContent=event.title;
+  document.getElementById('crisis-desc').textContent=event.desc;
+  document.getElementById('crisis-status').textContent=event.status(STATE);
+  const optsEl=document.getElementById('crisis-opts');
+  optsEl.innerHTML='';
+  event.opts.forEach(opt=>{
+    const btn=document.createElement('div');
+    const isGood=opt.good(STATE);
+    btn.className='crisis-opt'+(isGood?' opt-good':'');
+    btn.innerHTML=`<strong>${opt.label}</strong>${opt.text}`;
+    btn.onclick=()=>{
+      const type = isGood?'good':'bad';
+      logDecision(
+        `[Day ${STATE.day}] ${event.title} → "${opt.label}"`,
+        opt.text,
+        type
+      );
+      opt.fn(STATE);
+      ASSIGNMENTS={};SELECTED_CHAR=null;buildGameUI();showScreen('s-game');
+    };
+    optsEl.appendChild(btn);
+  });
+  showScreen('s-crisis');
+}
+
+//
+//  RESCUE SCORE
+//
+function showRescueScore(rescued=true) {
+  const s=STATE;
+  localStorage.removeItem('stranded_save');
+  const dayScore=rescued?Math.round(Math.max(0,(1-(s.day-1)/s.maxDays))*30):0;
+  const healthScore=Math.round(Object.values(s.energies).reduce((a,b)=>a+b,0)/40*25);
+  const moraleScore=Math.round(s.morale/100*20);
+  const effScore=Math.round(Math.min(1,(s.food+s.water)/20)*15);
+  const prepScore=(s.shelterBuilt?3:0)+(s.waterFilter?2:0)+(s.signalFireBuilt?3:0)+(s.antennaBuilt?2:0);
+  const total=Math.min(100,dayScore+healthScore+moraleScore+effScore+prepScore);
+  const grade=total>=90?'A . Master Operator':total>=80?'B+ . Strong Operator':total>=70?'B . Competent Leader':total>=60?'C+ . Learning Fast':'C . Room to Grow';
+  document.getElementById('score-big').textContent=total;
+  document.getElementById('score-grade').textContent=grade;
+  document.getElementById('score-sub').textContent=rescued?`Rescued on day ${s.day-1}`:'Day 30 -- never rescued';
+  const dims=[
+    {label:'Speed',score:dayScore,max:30,color:'var(--teal2)'},
+    {label:'Team health',score:healthScore,max:25,color:'var(--teal2)'},
+    {label:'Morale',score:moraleScore,max:20,color:'var(--amber)'},
+    {label:'Efficiency',score:effScore,max:15,color:'var(--amber)'},
+    {label:'Preparation',score:prepScore,max:10,color:'var(--lena-c)'},
+  ];
+  document.getElementById('score-dims').innerHTML=dims.map(d=>`<div class="score-dim-row"><span class="score-dim-lbl">${d.label}</span><div class="score-dim-track"><div class="score-dim-fill" style="width:${Math.round(d.score/d.max*100)}%;background:${d.color}"></div></div><span class="score-dim-val">${d.score}/${d.max}</span></div>`).join('');
+
+  // ── BUSINESS DEBRIEF (short summary) ──
+  const debrief=[];
+  if(s.shelterBuilt) debrief.push('+ Shelter built -- good operational preparation.');
+  else debrief.push('x No shelter -- crisis damage was unmitigated. Build Tier 1 first.');
+  if(s.signalFireBuilt) debrief.push('+ Signal fire lit -- excellent rescue signalling.');
+  else debrief.push('x No signal fire -- rescue probability stayed low.');
+  if(s.morale>60) debrief.push('+ Morale maintained -- team productivity stayed high.');
+  else debrief.push('x Morale fell -- stakeholder management gap. Assign Sam to morale tasks.');
+  if(s.food>5) debrief.push('+ Food security maintained throughout.');
+  else debrief.push('x Food critically low -- allocate Rex to foraging earlier.');
+  if(s.antennaBuilt) debrief.push('+ Radio antenna built -- maximum rescue signalling achieved.');
+  debrief.push('-> Business lesson: comparative advantage matters. Rex on builds = 2x output vs anyone else.');
+  document.getElementById('debrief-items').innerHTML=debrief.map(d=>`<div class="debrief-item">${d}</div>`).join('');
+
+  // ── DECISION CONSEQUENCES ──
+  // Auto-generate end-state consequences for things not logged during play
+  const dl = s.decisionLog || [];
+
+  // Items never built
+  if(!s.shelterBuilt) dl.push({day:'--',decision:'Shelter Frame never built',consequence:'Every crisis hit at full damage. Crisis probability stayed at 28% throughout the game.',type:'bad'});
+  if(!s.waterFilter) dl.push({day:'--',decision:'Water Filter never built',consequence:'Waterborne illness risk persisted all game. Any illness crisis lasted 3 days instead of 1.',type:'bad'});
+  if(!s.signalFireBuilt) dl.push({day:'--',decision:'Signal Fire never built',consequence:'Rescue chance stayed low. Passing Ship and Aircraft crises could not be capitalised on.',type:'bad'});
+  if(!s.spearBuilt) dl.push({day:'--',decision:'Fishing Spear never built',consequence:'Food gathering stayed at base rate. Rex\'s 30% food bonus went unused throughout.',type:'warn'});
+  if(!s.medkitBuilt) dl.push({day:'--',decision:'Medical Kit never built',consequence:'Injuries recovered at half speed. Rex injury crisis would have cost 4 days instead of 1.',type:'warn'});
+  if(!s.antennaBuilt) dl.push({day:'--',decision:'Radio Antenna never built',consequence:'Maximum rescue signal was never reached. Rescue chance capped far below potential.',type:'warn'});
+  if(s.herbsBuilt) dl.push({day:'--',decision:'Herb Garden built',consequence:'Passive -1 injury/illness every day. Fastest possible recovery throughout the game.',type:'good'});
+  if(s.towerBuilt) dl.push({day:'--',decision:'Lookout Tower built',consequence:'+15% rescue chance. Lena received +1 steel bonus on every Explore task.',type:'good'});
+  if(s.raftBuilt) dl.push({day:'--',decision:'Rescue Raft completed',consequence:'+30% rescue chance. Open-sea escape route unlocked.',type:'good'});
+  if(s.rainBuilt) dl.push({day:'--',decision:'Rain Collector built',consequence:'Water drain reduced from -6L to -2L per day. Water pressure removed from resource equation.',type:'good'});
+
+  // Final morale consequence
+  if(s.morale<30) dl.push({day:'--',decision:'Team morale collapsed below 30',consequence:'Mutiny risk triggered. Individual morale instability likely caused missed task output.',type:'bad'});
+  else if(s.morale>70) dl.push({day:'--',decision:'Team morale stayed above 70',consequence:'High morale multiplied individual task output throughout. Sam\'s assignment was well managed.',type:'good'});
+
+  // Lena explored or not
+  if(s.lenaExplored) dl.push({day:'--',decision:'Lena sent on Explore tasks',consequence:'Supply Cache opportunity unlocked. Potential +10 steel, +6 food windfall available.',type:'good'});
+  else dl.push({day:'--',decision:'Lena never sent to Explore',consequence:'Supply Cache crisis could not be triggered. Missed major steel and food opportunity.',type:'warn'});
+
+  // Outcome consequence
+  if(rescued) dl.push({day:s.day-1,decision:`Rescued on Day ${s.day-1}`,consequence:rescued&&s.day<15?'Early rescue. Exceptional signal discipline and build prioritisation.':rescued&&s.day<22?'Mid-game rescue. Solid execution across resource and signal management.':'Late rescue. Survival maintained but signal infrastructure took too long to build.',type:s.day<15?'good':s.day<22?'good':'warn'});
+  else dl.push({day:30,decision:'Never rescued — Day 30 reached',consequence:'Rescue chance never reached a level that could guarantee extraction. Signal infrastructure was insufficient.',type:'bad'});
+
+  // Render
+  if(dl.length===0) {
+    document.getElementById('consequence-box').style.display='none';
+  } else {
+    const icons={good:'✓',bad:'✗',warn:'!',info:'·'};
+    document.getElementById('consequence-items').innerHTML = dl.map(d=>`
+      <div class="consequence-item">
+        <div class="consequence-icon ${d.type}">${icons[d.type]||'·'}</div>
+        <div>
+          <div class="consequence-decision">${d.day!=='--'?`Day ${d.day} — `:''}${d.decision}</div>
+          <div class="consequence-result">${d.consequence}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  showScreen('s-score');
+}
+
+//
+//  HINT
+//
+function showHint() {
+  const s=STATE;
+  const hints=[];
+  if(s.food<10) hints.push('Food is low -- Rex gathers 2x as much food as anyone else.');
+  if(s.water<8) hints.push('Water is critical -- assign someone to fetch water now.');
+  if(!s.shelterBuilt&&s.wood<8) hints.push(`Need 8 wood for shelter. Have ${Math.round(s.wood)} -- send Rex to gather wood.`);
+  if(!s.shelterBuilt&&s.wood>=8) hints.push('Enough wood! Open Crafting tab -> start the shelter. Assign Rex to Build task.');
+  if(s.shelterBuilt&&!s.signalFireBuilt&&!s.activeBuild) hints.push('Shelter done! Start the signal fire next -- +20% rescue chance per day.');
+  if(s.morale_chars.sam<40) hints.push('Sam\'s morale is low -- assign them to "Boost morale" today.');
+  if(!ASSIGNMENTS.lena) hints.push('Lena unassigned -- team morale drops -5/day. Give her Explore or Build.');
+  if(s.steel>=6&&!s.antennaBuilt&&s.signalFireBuilt) hints.push('You have enough steel for the radio antenna -- builds the fastest path to rescue.');
+  if(hints.length===0) hints.push('Good position. Keep signal fire running and maintain morale above 50.');
+  alert('[hint] ' + hints[0]);
+}
+
+function goIntro() { showScreen('s-intro'); checkForSave(); }
+function restartGame() { localStorage.removeItem('stranded_save'); initState(); triggerDialogue('day1'); }
+
+//
+//  INIT
+//
+initState();
+checkForSave();
+
+</script>
+</body>
+</html>
